@@ -44,10 +44,27 @@ int unSQZ(char *inputfile, unsigned char **output) {
     char b3;
     char b4;
     int out_len = 0;
-
+	char path_work[256];
     FILE *ifp;
+    
+#ifdef HOME_SUPPORT 
+    sprintf(path_work, "%s/.opentitus/%s", getenv("HOME"), inputfile);
+#else
+	#ifdef _TINSPIRE
+		sprintf(path_work, "./%s.tns", inputfile);
+	#elif defined(DREAMCAST)
+		sprintf(path_work, "/sd/%s", inputfile);
+		ifp = fopen(path_work, "rb");
+		if (ifp == NULL) {
+			sprintf(path_work, "/cd/%s", inputfile);
+		}
+		else { fclose(ifp); }
+	#else
+		sprintf(path_work, "%s", inputfile);
+	#endif
+#endif
 
-    ifp = fopen(inputfile, "rb");
+    ifp = fopen(path_work, "rb");
 
     if (ifp == NULL) {
         sprintf(lasterror, "Error: Can't open input file: %s!\n", inputfile);

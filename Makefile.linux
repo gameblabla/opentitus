@@ -1,6 +1,6 @@
 CC = clang
 INCLUDE = -I./include -I./opl -I/usr/include/SDL
-CFLAGS  = -O2 -g3 -D_GNU_SOURCE=1 -D_REENTRANT $(INCLUDE) -std=gnu99
+CFLAGS  = -O2 -g3 -D_GNU_SOURCE=1 -D_REENTRANT $(INCLUDE) -std=gnu99 -DHOME_SUPPORT
 UNSQZ_TARG := unsqz
 # LEVELVIEWER_TARG := levelviewer
 OPENTITUS_TARG := opentitus
@@ -35,7 +35,7 @@ OPENTITUS_OBJS := \
 	src/sqz.o \
 	src/tile_animation.o \
 	src/viewimage.o src/global.o \
-	opl/dbopl_light.o opl/opl.o opl/opl_sdl.o opl/opl_queue.o
+	opl/dbopl_light.o opl/opl.o opl/opl_sdl.o opl/opl_queue.o src/font/font_drawing.o
 
 DIRS = \
 	. \

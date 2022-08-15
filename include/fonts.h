@@ -62,6 +62,7 @@ int freefonts(void);
 //SDL_Surface * SDL_Text(char *text, bool inv_back);
 //int SDL_Print_Text(char *text, int x, int y, bool inv_back);
 int SDL_Print_Text(uint8 *text, int x, int y);
+int nogame_data();
 
 int viewintrotext();
 

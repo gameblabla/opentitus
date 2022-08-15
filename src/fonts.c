@@ -38,6 +38,9 @@
 #include "keyboard.h"
 #include "draw.h"
 #include "globals.h"
+#include "font/font_drawing.h"
+
+
 #include <time.h>
 
 SDL_Surface * SDL_LoadChar(unsigned char * fontdata, int offset, SDL_PixelFormat * pixelformat);
@@ -55,7 +58,7 @@ int loadfonts(void) {
 
     if (retval < 0) {
         lasterrornr = retval;
-        free (fontdata);
+        //if (fontdata) free (fontdata);
         return (0);
     }
 
@@ -240,7 +243,7 @@ SDL_Surface * SDL_LoadChar(unsigned char * fontdata, int offset, SDL_PixelFormat
 
 
 int freefonts(void) {
-    freesubfont(font);
+    if (font) freesubfont(font);
     return 0;
 }
 
@@ -569,4 +572,25 @@ int viewintrotext(){
         return retval;
 */
     return (0);
+}
+
+
+int nogame_data(){
+    int retval;
+	print_string("MISSING GAME DATA !", 0xFFFF, 0, 24, 16, screen->pixels);
+	#if defined(DREAMCAST)
+	print_string("Make sure to put it on your SD card", 0xFFFF, 0, 24, 48, screen->pixels);
+	print_string("OR", 0xFFFF, 0, 24, 64, screen->pixels);
+	print_string("rebuild the ISO with data inside", 0xFFFF, 0, 24, 80, screen->pixels);
+	#elif defined(HOME_SUPPORT)
+	print_string("Make sure to put it in $HOME/.opentitus", 0xFFFF, 0, 24, 48, screen->pixels);
+	#else
+	print_string("Make sure to put it relative", 0xFFFF, 0, 24, 48, screen->pixels);
+	print_string("to the executable.", 0xFFFF, 0, 24, 64, screen->pixels);
+	#endif
+	print_string("Press any button to reset", 0xFFFF, 0, 24, 112, screen->pixels);
+    Flip_Titus();
+
+    waitforbutton();
+    return 1;
 }

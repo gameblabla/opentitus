@@ -72,8 +72,24 @@ int main(int argc, char *argv[]) {
     int retval;
     int state = 1; //View the menu when the main loop starts
     retval = init();
+    printf("retval %d\n", retval);
     if (retval < 0)
+    {
+		nogame_data();
         state = 0;
+        goto exitgame;
+    }   
+#ifdef HOME_PATH
+	char home_path[256];
+	snprintf(home_path, sizeof(home_path), "%s/.opentitus", getenv("HOME"));
+	if (access( home_path, F_OK ) == -1)
+	{
+		mkdir(home_path, 0755);
+		nogame_data();
+        state = 0;
+        goto exitgame;
+	}
+#endif
 
 #ifndef __vita__
     if (state) {
@@ -111,6 +127,8 @@ int main(int argc, char *argv[]) {
                 state = 0;
         }
     }
+
+exitgame:
     
     freefonts();
 
@@ -214,7 +232,11 @@ int init() {
 */
 
 #ifdef AUDIO_ENABLED
-	initaudio();
+	retval = initaudio();
+	if (retval < 0)
+	{
+		return TITUS_ERROR_SDL_ERROR;
+	}
 #endif
 
     initoriginal();

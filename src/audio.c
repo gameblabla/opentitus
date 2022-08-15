@@ -375,7 +375,27 @@ int load_file(char *filename, unsigned char **raw_data)
     FILE *ifp;
 	uint8 buffer[100];
 	uint16 data_offset, data_size;
-    ifp = fopen(filename, "rb");
+    char path_work[256];
+    
+#ifdef HOME_SUPPORT
+    sprintf(path_work, "%s/.opentitus/%s", getenv("HOME"), filename);
+    ifp = fopen(path_work, "rb");
+#else
+	#if defined(_TINSPIRE)
+		sprintf(path_work, "./%s.tns", filename);
+	#elif defined(DREAMCAST)
+		sprintf(path_work, "/sd/%s", filename);
+		ifp = fopen(path_work, "rb");
+		if (ifp == NULL) {
+			sprintf(path_work, "/cd/%s", filename);
+		}
+		else { fclose(ifp); }
+	#else
+		sprintf(path_work, "%s", filename);
+    #endif
+#endif
+	
+    ifp = fopen(path_work, "rb");
 
     if (ifp == NULL) {
         fprintf(stderr, "Can't open input file: %s!\n", filename);
@@ -453,8 +473,8 @@ int SELECT_MUSIC(int song_number)
     int i; //Index
     int j; //Offset to the current offset
     int k;
-    unsigned int tmp1; //Source offset
-    unsigned int tmp2; //Next offset
+    unsigned int tmp1 = 0; //Source offset
+    unsigned int tmp2 = 0; //Next offset
     ADLIB_DATA *aad = &(sdl_player_data.aad);
     unsigned char *raw_data = aad->data;
     if (song_type[song_number] == 0) { //0: level music, 1: bonus
@@ -692,6 +712,7 @@ int initaudio(){
     {
         fprintf(stderr, "Unable to initialise OPL layer\n");
         exit(-1);
+        return TITUS_ERROR_SDL_ERROR;
     }
 
 	sdl_player_data.aad.data_size = load_file(audiofile, &(sdl_player_data.aad.data));
@@ -704,7 +725,7 @@ int initaudio(){
 	*/
     if (sdl_player_data.aad.data_size < 0) {
         freeaudio();
-        return 0;
+        return TITUS_ERROR_FILE_NOT_FOUND;
     }
 	
 	initsfx();

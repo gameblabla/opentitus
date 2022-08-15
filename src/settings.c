@@ -41,6 +41,8 @@
 
 int readconfig(char *configfile) {
     char line[300], tmp[256];
+    char path_work[256];
+    char path_spr[256];
     int retval, i, j, tmpcount = 0;
     levelcount = 0;
     spritefile[0] = 0;
@@ -216,6 +218,31 @@ int readconfig(char *configfile) {
         printf("Error: 'levelcount' (%d) and the number of specified levels (%d) does not match, check config file: %s!\n", levelcount, tmpcount, configfile);
         return(-1);
     }
+    
+#ifdef HOME_SUPPORT 
+    sprintf(path_work, "%s/.opentitus/%s", getenv("HOME"), levelfiles[i - 1]);
+    sprintf(path_spr, "%s/.opentitus/%s", getenv("HOME"), spritefile);
+#else
+
+#if defined(_TINSPIRE)
+    sprintf(path_work, "./%s.tns", levelfiles[i - 1]);
+    sprintf(path_spr, "./%s.tns", spritefile);
+#elif defined(DREAMCAST)
+    sprintf(path_work, "/sd/%s", levelfiles[i - 1]);
+    sprintf(path_spr, "/sd/%s", spritefile);
+	sprintf(tmp, "/sd/%s", spritefile);
+	ifp = fopen(tmp, "rb");
+	if (ifp == NULL) {
+		sprintf(path_work, "/cd/%s", levelfiles[i - 1]);
+		sprintf(path_spr, "/cd/%s", spritefile);
+	}
+	else { fclose(ifp); }
+#else
+    sprintf(path_work, "%s", levelfiles[i - 1]);
+    sprintf(path_spr, "%s", spritefile);
+#endif
+
+#endif
 
     for (i = 1; i <= levelcount; i++) {
         if (levelfiles[i - 1][0] == 0) {
