@@ -36,6 +36,8 @@
 
 int copytiles(int16 destX, int16 destY, int16 width, int16 height);
 int drawlines(int16 destX, int16 destY, int16 width, int16 height);
+void check_finish(TITUS_level *level);
+void check_gates(TITUS_level *level);
 
 int CROSSING_GATE(TITUS_level *level) { //Check and handle level completion, and if the player does a kneestand on a secret entrance
     check_finish(level);
@@ -43,7 +45,7 @@ int CROSSING_GATE(TITUS_level *level) { //Check and handle level completion, and
 }
 
 
-check_finish(TITUS_level *level) {
+void check_finish(TITUS_level *level) {
     TITUS_player *player = &(level->player);
     if (boss_alive) { //There is still a boss that needs to be killed!
         return;
@@ -70,7 +72,7 @@ check_finish(TITUS_level *level) {
     NEWLEVEL_FLAG = true;
 }
 
-check_gates(TITUS_level *level) {
+void check_gates(TITUS_level *level) {
     TITUS_player *player = &(level->player);
     uint8 i;
     if ((CROSS_FLAG == 0) || //not kneestanding
@@ -123,9 +125,9 @@ int CLOSE_SCREEN() {
 
 	//First of all: make the screen black, at least the lower part of the screen
     dest.x = 0;
-    dest.y = screen_height * 16 * scaling;
-    dest.w = screen_width * 16 * scaling;
-    dest.h = resheight - screen_height * 16 * scaling;
+    dest.y = screen_height * 16 ;
+    dest.w = screen_width * 16 ;
+    dest.h = resheight - screen_height * 16 ;
     SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, 0, 0, 0));
 
     for (i = 0; i <= step_count; i++) {
@@ -134,29 +136,29 @@ int CLOSE_SCREEN() {
         //Clear top
         dest.x = 0;
         dest.y = 0;
-        dest.w = screen_width * 16 * scaling;
-        dest.h = i * incY * scaling;
+        dest.w = screen_width * 16 ;
+        dest.h = i * incY ;
         SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, 0, 0, 0));
         
         //Clear left
         dest.x = 0;
         dest.y = 0;
-        dest.w = i * incX * scaling;
-        dest.h = screen_height * 16 * scaling;
+        dest.w = i * incX ;
+        dest.h = screen_height * 16 ;
         SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, 0, 0, 0));
         
         //Clear bottom
         dest.x = 0;
-        dest.y = (rheight - (i * incY)) * scaling;
-        dest.w = screen_width * 16 * scaling;
-        dest.h = i * incY * scaling;
+        dest.y = (rheight - (i * incY)) ;
+        dest.w = screen_width * 16 ;
+        dest.h = i * incY ;
         SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, 0, 0, 0));
         
         //Clear right
-        dest.x = (rwidth - (i * incX)) * scaling;
+        dest.x = (rwidth - (i * incX)) ;
         dest.y = 0;
-        dest.w = i * incX * scaling;
-        dest.h = screen_height * 16 * scaling;
+        dest.w = i * incX ;
+        dest.h = screen_height * 16 ;
         SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, 0, 0, 0));
     }
     flip_screen(false); //quick flip TODO: move to other end of loop?
@@ -180,24 +182,24 @@ int OPEN_SCREEN(TITUS_level *level) {
     //BLACK_SCREEN
     dest.x = 0;
     dest.y = 0;
-    dest.w = 320 * scaling;
-    dest.h = 192 * scaling;
+    dest.w = 320 ;
+    dest.h = 192 ;
     SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, 0, 0, 0));
 
     j = step_count;
     for (i = 2; i <= step_count * 2; i += 2) {
         j--;
         flip_screen(false); //quick flip TODO: move to other end of loop?
-        if (AMIGA_LINES) {
-            drawlines( j * blockX * scaling, j * blockY * scaling, ((i * blockX) - blockX) * scaling, blockY * scaling); //Upper tiles
-            drawlines(((j * blockX) + (i * blockX) - blockX) * scaling, j * blockY * scaling, blockX * scaling, i * blockY * scaling); //Right tiles
-            drawlines(((j * blockX) + blockX) * scaling, (((j + 1) * blockY) + (i * blockY) - blockY) * scaling, ((i * blockX) - blockX) * scaling, blockY * scaling); //Bottom tiles
-            drawlines( j * blockX * scaling, ((j * blockY) + blockY) * scaling, blockX * scaling, i * blockY * scaling); //Left tiles
-        }
-        copytiles( j * blockX * scaling, j * blockY * scaling, ((i * blockX) - blockX) * scaling, blockY * scaling); //Upper tiles
-        copytiles(((j * blockX) + (i * blockX) - blockX) * scaling, j * blockY * scaling, blockX * scaling, i * blockY * scaling); //Right tiles
-        copytiles(((j * blockX) + blockX) * scaling, (((j + 1) * blockY) + (i * blockY) - blockY) * scaling, ((i * blockX) - blockX) * scaling, blockY * scaling); //Bottom tiles
-        copytiles( j * blockX * scaling, ((j * blockY) + blockY) * scaling, blockX * scaling, i * blockY * scaling); //Left tiles
+        #ifndef NOAMIGA
+            drawlines( j * blockX , j * blockY , ((i * blockX) - blockX) , blockY ); //Upper tiles
+            drawlines(((j * blockX) + (i * blockX) - blockX) , j * blockY , blockX , i * blockY ); //Right tiles
+            drawlines(((j * blockX) + blockX) , (((j + 1) * blockY) + (i * blockY) - blockY) , ((i * blockX) - blockX) , blockY ); //Bottom tiles
+            drawlines( j * blockX , ((j * blockY) + blockY) , blockX , i * blockY ); //Left tiles
+        #endif
+        copytiles( j * blockX , j * blockY , ((i * blockX) - blockX) , blockY ); //Upper tiles
+        copytiles(((j * blockX) + (i * blockX) - blockX) , j * blockY , blockX , i * blockY ); //Right tiles
+        copytiles(((j * blockX) + blockX) , (((j + 1) * blockY) + (i * blockY) - blockY) , ((i * blockX) - blockX) , blockY ); //Bottom tiles
+        copytiles( j * blockX , ((j * blockY) + blockY) , blockX , i * blockY ); //Left tiles
 	}
     flip_screen(false); //quick flip TODO: move to other end of loop?
 }
@@ -206,10 +208,10 @@ int copytiles(int16 destX, int16 destY, int16 width, int16 height) {
     SDL_Rect src, dest;
     bool firstX, firstY;
 
-//    int16 sepX = BITMAP_XM * 16 * scaling;
-//    int16 sepY = BITMAP_YM * 16 * scaling;
-    int16 sepXi = (S_COLUMNS - BITMAP_XM) * 16 * scaling;
-    int16 sepYi = (S_LINES - BITMAP_YM) * 16 * scaling;
+//    int16 sepX = BITMAP_XM * 16 ;
+//    int16 sepY = BITMAP_YM * 16 ;
+    int16 sepXi = (S_COLUMNS - BITMAP_XM) * 16 ;
+    int16 sepYi = (S_LINES - BITMAP_YM) * 16 ;
 
     // Tile screen:  | Output screen:
     //               |
@@ -231,13 +233,13 @@ int copytiles(int16 destX, int16 destY, int16 width, int16 height) {
         dest.y = destY;
 */
         //src.w = width;
-        int limitX = width / (16 * scaling) + BITMAP_XM;
-        if ((width % (16 * scaling)) != 0) {
+        int limitX = width / (16 ) + BITMAP_XM;
+        if ((width % (16 )) != 0) {
             limitX++;
         }
         //src.h = height;
-        int limitY = height / (16 * scaling) + BITMAP_YM;
-        if ((height % (16 * scaling)) != 0) {
+        int limitY = height / (16 ) + BITMAP_YM;
+        if ((height % (16 )) != 0) {
             limitY++;
         }
         if (destX + width > sepXi) { //Both A and B
@@ -250,26 +252,26 @@ int copytiles(int16 destX, int16 destY, int16 width, int16 height) {
         }
 
         firstY = true;
-        for (int i = BITMAP_YM + destY / (16 * scaling); i < limitY; i++) {
+        for (int i = BITMAP_YM + destY / (16 ); i < limitY; i++) {
             firstX = true;
-            for (int j = BITMAP_XM + destX / (16 * scaling); j < limitX; j++) {
+            for (int j = BITMAP_XM + destX / (16 ); j < limitX; j++) {
                 if (firstX) {
-                    src.x = destX % (16 * scaling); //The remainder for the division
+                    src.x = destX % (16 ); //The remainder for the division
                 } else {
                     src.x = 0;
                 }
-                src.w = 16 * scaling - src.x;
-                if (j * 16 * scaling + src.w > BITMAP_XM * 16 * scaling + width) {
+                src.w = 16  - src.x;
+                if (j * 16  + src.w > BITMAP_XM * 16  + width) {
                     //src.w = 
                 }
                 if (firstY) {
-                    src.y = destY % (16 * scaling);
+                    src.y = destY % (16 );
                 } else {
                     src.y = 0;
                 }
-                src.h = (16 * scaling) - src.y;
-                dest.x = (j - BITMAP_XM) * 16 * scaling + src.x;
-                dest.y = (i - BITMAP_YM) * 16 * scaling + src.y;
+                src.h = (16 ) - src.y;
+                dest.x = (j - BITMAP_XM) * 16  + src.x;
+                dest.y = (i - BITMAP_YM) * 16  + src.y;
                 //SDL_BlitSurface(level->tile[level->tile[tile_screen[i][j]].animation[tile_anim]].tiledata, &src, screen, &dest);
                 firstX = false;
             }
@@ -284,8 +286,8 @@ int copytiles(int16 destX, int16 destY, int16 width, int16 height) {
         src.x = destX - sepXi;
         src.y = sepYi + destY;
         src.w = width;
-        int limitY = height / (16 * scaling) + BITMAP_YM;
-        if ((height % (16 * scaling)) != 0) {
+        int limitY = height / (16 ) + BITMAP_YM;
+        if ((height % (16 )) != 0) {
             limitY++;
         }
         dest.x = destX;
@@ -301,17 +303,17 @@ int copytiles(int16 destX, int16 destY, int16 width, int16 height) {
         }
 
         firstY = true;
-        for (int i = BITMAP_YM + destY / (16 * scaling); i < limitY; i++) {
+        for (int i = BITMAP_YM + destY / (16 ); i < limitY; i++) {
             firstX = true;
             for (int j = 0; j < BITMAP_XM; j++) {
                 if (firstY) {
-                    src.y = destY % (16 * scaling);
+                    src.y = destY % (16 );
                 } else {
                     src.y = 0;
                 }
-                src.h = (16 * scaling) - src.y;
-                dest.x = (j + screen_width - BITMAP_XM) * 16 * scaling;
-                dest.y = (i - BITMAP_YM) * 16 * scaling + src.y;
+                src.h = (16 ) - src.y;
+                dest.x = (j + screen_width - BITMAP_XM) * 16 ;
+                dest.y = (i - BITMAP_YM) * 16  + src.y;
                 //SDL_BlitSurface(level->tile[level->tile[tile_screen[i][j]].animation[tile_anim]].tiledata, &src, screen, &dest);
             }
         }
@@ -320,8 +322,8 @@ int copytiles(int16 destX, int16 destY, int16 width, int16 height) {
     //Lower left on screen (C)
 	for (int i = 0; i < BITMAP_YM; i++) {
 		for (int j = BITMAP_XM; j < screen_width; j++) {
-			dest.x = (j - BITMAP_XM) * 16 * scaling;
-			dest.y = (i + screen_height - BITMAP_YM) * 16 * scaling;
+			dest.x = (j - BITMAP_XM) * 16 ;
+			dest.y = (i + screen_height - BITMAP_YM) * 16 ;
 			//surface = SDL_DisplayFormat(level->tile[level->tile[tile_screen[i][j]].animation[tile_anim]].tiledata);
 			//SDL_BlitSurface(surface, &src, screen, &dest);
 			//SDL_FreeSurface(surface);
@@ -332,8 +334,8 @@ int copytiles(int16 destX, int16 destY, int16 width, int16 height) {
     //Lower right on screen (D)
 	for (int i = 0; i < BITMAP_YM; i++) {
 		for (int j = 0; j < BITMAP_XM; j++) {
-			dest.x = (j + screen_width - BITMAP_XM) * 16 * scaling;
-			dest.y = (i + screen_height - BITMAP_YM) * 16 * scaling;
+			dest.x = (j + screen_width - BITMAP_XM) * 16 ;
+			dest.y = (i + screen_height - BITMAP_YM) * 16 ;
 			//surface = SDL_DisplayFormat(level->tile[level->tile[tile_screen[i][j]].animation[tile_anim]].tiledata);
 			//SDL_BlitSurface(surface, &src, screen, &dest);
 			//SDL_FreeSurface(surface);
@@ -441,11 +443,11 @@ int drawlines(int16 destX, int16 destY, int16 width, int16 height) {
     r_t = -128;
     g_t = -128;
     b_t = 0;
-    dest.x = destX * scaling;
-    dest.w = width * scaling;
+    dest.x = destX ;
+    dest.w = width ;
     for (i = 0; i < screen_height * 16; i++) {
-        dest.y = i * scaling;
-        dest.h = scaling;
+        dest.y = i ;
+        dest.h = 1;
         r_t++;
         g_t++;
         b_t++;

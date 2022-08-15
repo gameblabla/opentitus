@@ -616,7 +616,7 @@ int startmusic() {
 int refreshaudio() {
     if (AUDIOMODE != 1)
     {
-        return;
+        return 0;
     }
     int tick = SDL_GetTicks();
 	if (tick - lastaudiotick < audiodelay) {
@@ -719,7 +719,7 @@ int freeaudio(){
 
     OPL_Shutdown();
 
-    if(!SDL_WasInit(SDL_INIT_AUDIO)) return;
+    if(!SDL_WasInit(SDL_INIT_AUDIO)) return 0;
 
     SDL_CloseAudio();
 
@@ -806,7 +806,7 @@ int FX_START(int fx_number){
 
 int FX_DRIVER() {
     ADLIB_DATA *aad = &(sdl_player_data.aad);
-	if (!FX_ON) return;
+	if (!FX_ON) return 0;
 	updatechip(0xBD, 0xEF & aad->perc_stat);
 	updatechip(0xA6, 0x57);
 	updatechip(0xB6, 1);

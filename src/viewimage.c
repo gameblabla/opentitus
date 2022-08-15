@@ -76,7 +76,7 @@ int viewimage(char * imagefile, int imageformat, int displayformat, int delay) {
 
     switch (imageformat) {
     case 0: //Planar 16-color grayscale
-        surface = SDL_CreateRGBSurface(SDL_SWSURFACE, 320 * scaling, 200 * scaling, 8, 0, 0, 0, 0);
+        surface = SDL_CreateRGBSurface(SDL_SWSURFACE, 320 , 200 , 8, 0, 0, 0, 0);
         palette = (surface->format)->palette;
         if (palette) {
             for (i = 0; i < 16; i++) {
@@ -89,38 +89,13 @@ int viewimage(char * imagefile, int imageformat, int displayformat, int delay) {
 
         groupsize = ((320 * 200) >> 3);
         tmpchar = (char *)surface->pixels;
-		if (scaling == 1) {
-			for (i = 0; i < groupsize; i++) {
-				for (j = 7; j >= 0; j--) {
-					*tmpchar = (imagedata[i] >> j) & 0x01;
-					*tmpchar += (imagedata[i + groupsize] >> j << 1) & 0x02;
-					*tmpchar += (imagedata[i + groupsize * 2] >> j << 2) & 0x04;
-					*tmpchar += (imagedata[i + groupsize * 3] >> j << 3) & 0x08;
-					tmpchar++;
-				}
-            }
-        } else {
-			//4 mono images, 8000 bytes in each (320*200 pixels -> 64000 bits -> 8000 bytes), 40 bytes each line
-			for (h = 0; h < 200; h++) { //200 lines
-				for (i = 0; i < 40; i++) { //40 bytes each line (320 bits)
-					for (j = 7; j >= 0; j--) {
-						for (h2 = 0; h2 < scaling; h2++) {
-							for (w2 = 0; w2 < scaling; w2++) {
-								*tmpchar = (imagedata[h*40+i] >> j) & 0x01;
-								*tmpchar += (imagedata[h*40+i + groupsize] >> j << 1) & 0x02;
-								*tmpchar += (imagedata[h*40+i + groupsize * 2] >> j << 2) & 0x04;
-								*tmpchar += (imagedata[h*40+i + groupsize * 3] >> j << 3) & 0x08;
-								tmpchar++; //One pixel right
-							}
-							tmpchar -= scaling; //Back to first pixel that line
-							tmpchar += 320 * scaling; //One line down
-						}
-						tmpchar -= scaling * scaling * 320; //Back to first line, first pixel
-						tmpchar += scaling; //Next scaling*scaling pixel
-					}
-				}
-				tmpchar -= 320 * scaling; //New line
-				tmpchar += scaling * scaling * 320;
+		for (i = 0; i < groupsize; i++) {
+			for (j = 7; j >= 0; j--) {
+				*tmpchar = (imagedata[i] >> j) & 0x01;
+				*tmpchar += (imagedata[i + groupsize] >> j << 1) & 0x02;
+				*tmpchar += (imagedata[i + groupsize * 2] >> j << 2) & 0x04;
+				*tmpchar += (imagedata[i + groupsize * 3] >> j << 3) & 0x08;
+				tmpchar++;
 			}
 		}
 
@@ -131,7 +106,7 @@ int viewimage(char * imagefile, int imageformat, int displayformat, int delay) {
         break;
 
     case 2: //256 color
-        surface = SDL_CreateRGBSurface(SDL_SWSURFACE, 320 * scaling, 200 * scaling, 8, 0, 0, 0, 0);
+        surface = SDL_CreateRGBSurface(SDL_SWSURFACE, 320 , 200 , 8, 0, 0, 0, 0);
         palette = (surface->format)->palette;
         if (palette) {
             for (i = 0; i < 256; i++) {
@@ -143,29 +118,9 @@ int viewimage(char * imagefile, int imageformat, int displayformat, int delay) {
         }
 
         tmpchar = (char *)surface->pixels;
-		if (scaling == 1) {
-			for (i = 256 * 3; i < 256 * 3 + 320*200; i++) {
-				*tmpchar = imagedata[i];
-				tmpchar++;
-			}
-        } else {
-			//1 rgb image
-			for (i = 0; i < 200; i++) {
-				for (j = 0; j < 320; j++) {
-					for (h2 = 0; h2 < scaling; h2++) {
-						for (w2 = 0; w2 < scaling; w2++) {
-							*tmpchar = imagedata[256 * 3 + i*320+j];
-							tmpchar++; //One pixel right
-						}
-						tmpchar -= scaling; //Back to first pixel that line
-						tmpchar += 320 * scaling; //One line down
-					}
-					tmpchar -= scaling * scaling * 320; //Back to first line, first pixel
-					tmpchar += scaling; //Next scaling*scaling pixel
-				}
-				tmpchar -= 320 * scaling; //New line
-				tmpchar += scaling * scaling * 320;
-			}
+		for (i = 256 * 3; i < 256 * 3 + 320*200; i++) {
+			*tmpchar = imagedata[i];
+			tmpchar++;
 		}
         break;
     }

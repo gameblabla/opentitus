@@ -333,10 +333,10 @@ int DISPLAY_CHAR(TITUS_level *level, uint8 tile, uint8 y, uint8 x) {
     SDL_Rect src, dest;
     src.x = 0;
     src.y = 0;
-    src.w = 16 * scaling;
-    src.h = 16 * scaling;
-    dest.x = x * 16 * scaling;
-    dest.y = y * 16 * scaling;
+    src.w = 16 ;
+    src.h = 16 ;
+    dest.x = x * 16 ;
+    dest.y = y * 16 ;
     SDL_BlitSurface(level->tile[level->tile[tile].animation[tile_anim]].tiledata, &src, tilescreen, &dest);
 */
 	tile_screen[y][x] = tile;

@@ -57,12 +57,12 @@ int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from 
 
 	//First of all: make the screen black, at least the lower part of the screen
     dest.x = 0;
-    dest.y = screen_height * 16 * scaling;
-    dest.w = screen_width * 16 * scaling;
-    dest.h = resheight - screen_height * 16 * scaling;
+    dest.y = screen_height * 16 ;
+    dest.w = screen_width * 16 ;
+    dest.h = resheight - screen_height * 16 ;
     SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, 0, 0, 0));
 
-	if (AMIGA_LINES) {
+	#ifndef NOAMIGA
 		//Testing: Amiga lines
 	
 		r_t = -128;
@@ -70,9 +70,9 @@ int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from 
 		b_t = 0;
 		for (i = 0; i < screen_height * 16; i++) {
 			dest.x = 0;
-			dest.y = i * scaling;
-			dest.w = screen_width * 16 * scaling;
-			dest.h = scaling;
+			dest.y = i ;
+			dest.w = screen_width * 16 ;
+			dest.h = 1;
 			r_t++;
 			g_t++;
 			b_t++;
@@ -98,7 +98,7 @@ int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from 
 			SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, (uint8)r, (uint8)g, (uint8)b));
 
 		}
-	}
+	#endif
 	
     // Tile screen:  | Output screen:
     //               |
@@ -111,52 +111,52 @@ int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from 
     
 /*    
     //Upper left on screen (A)
-    src.x = BITMAP_XM * 16 * scaling;
-    src.y = BITMAP_YM * 16 * scaling;
-    src.w = (screen_width - BITMAP_XM) * 16 * scaling;
-    src.h = (screen_height - BITMAP_YM) * 16 * scaling;
+    src.x = BITMAP_XM * 16 ;
+    src.y = BITMAP_YM * 16 ;
+    src.w = (screen_width - BITMAP_XM) * 16 ;
+    src.h = (screen_height - BITMAP_YM) * 16 ;
     dest.x = 0;
     dest.y = 0;
     SDL_BlitSurface(tilescreen, &src, screen, &dest);
 
     //Upper right on screen (B)
     src.x = 0;
-    src.y = BITMAP_YM * 16 * scaling;
-    src.w = BITMAP_XM * 16 * scaling;
-    src.h = (screen_height - BITMAP_YM) * 16 * scaling;
-    dest.x = (screen_width - BITMAP_XM) * 16 * scaling;
+    src.y = BITMAP_YM * 16 ;
+    src.w = BITMAP_XM * 16 ;
+    src.h = (screen_height - BITMAP_YM) * 16 ;
+    dest.x = (screen_width - BITMAP_XM) * 16 ;
     dest.y = 0;
     SDL_BlitSurface(tilescreen, &src, screen, &dest);
 
     //Lower left on screen (C)
-    src.x = BITMAP_XM * 16 * scaling;
+    src.x = BITMAP_XM * 16 ;
     src.y = 0;
-    src.w = (screen_width - BITMAP_XM) * 16 * scaling;
-    src.h = BITMAP_YM * 16 * scaling;
+    src.w = (screen_width - BITMAP_XM) * 16 ;
+    src.h = BITMAP_YM * 16 ;
     dest.x = 0;
-    dest.y = (screen_height - BITMAP_YM) * 16 * scaling;
+    dest.y = (screen_height - BITMAP_YM) * 16 ;
     SDL_BlitSurface(tilescreen, &src, screen, &dest);
 
     //Lower right on screen (D)
     src.x = 0;
     src.y = 0;
-    src.w = BITMAP_XM * 16 * scaling;
-    src.h = BITMAP_YM * 16 * scaling;
-    dest.x = (screen_width - BITMAP_XM) * 16 * scaling;
-    dest.y = (screen_height - BITMAP_YM) * 16 * scaling;
+    src.w = BITMAP_XM * 16 ;
+    src.h = BITMAP_YM * 16 ;
+    dest.x = (screen_width - BITMAP_XM) * 16 ;
+    dest.y = (screen_height - BITMAP_YM) * 16 ;
     SDL_BlitSurface(tilescreen, &src, screen, &dest);
 */
 
     src.x = 0;
     src.y = 0;
-    src.w = 16 * scaling;
-    src.h = 16 * scaling;
+    src.w = 16 ;
+    src.h = 16 ;
 
     //Upper left on screen (A)
 	for (i = BITMAP_YM; i < screen_height; i++) {
 		for (j = BITMAP_XM; j < screen_width; j++) {
-			dest.x = (j - BITMAP_XM) * 16 * scaling;
-			dest.y = (i - BITMAP_YM) * 16 * scaling;
+			dest.x = (j - BITMAP_XM) * 16 ;
+			dest.y = (i - BITMAP_YM) * 16 ;
 			//surface = SDL_DisplayFormat(level->tile[level->tile[tile_screen[i][j]].animation[tile_anim]].tiledata);
 			//SDL_BlitSurface(surface, &src, screen, &dest);
 			//SDL_FreeSurface(surface);
@@ -167,8 +167,8 @@ int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from 
     //Upper right on screen (B)
 	for (i = BITMAP_YM; i < screen_height; i++) {
 		for (j = 0; j < BITMAP_XM; j++) {
-			dest.x = (j + screen_width - BITMAP_XM) * 16 * scaling;
-			dest.y = (i - BITMAP_YM) * 16 * scaling;
+			dest.x = (j + screen_width - BITMAP_XM) * 16 ;
+			dest.y = (i - BITMAP_YM) * 16 ;
 			//surface = SDL_DisplayFormat(level->tile[level->tile[tile_screen[i][j]].animation[tile_anim]].tiledata);
 			//SDL_BlitSurface(surface, &src, screen, &dest);
 			//SDL_FreeSurface(surface);
@@ -179,8 +179,8 @@ int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from 
     //Lower left on screen (C)
 	for (i = 0; i < BITMAP_YM; i++) {
 		for (j = BITMAP_XM; j < screen_width; j++) {
-			dest.x = (j - BITMAP_XM) * 16 * scaling;
-			dest.y = (i + screen_height - BITMAP_YM) * 16 * scaling;
+			dest.x = (j - BITMAP_XM) * 16 ;
+			dest.y = (i + screen_height - BITMAP_YM) * 16 ;
 			//surface = SDL_DisplayFormat(level->tile[level->tile[tile_screen[i][j]].animation[tile_anim]].tiledata);
 			//SDL_BlitSurface(surface, &src, screen, &dest);
 			//SDL_FreeSurface(surface);
@@ -191,8 +191,8 @@ int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from 
     //Lower right on screen (D)
 	for (i = 0; i < BITMAP_YM; i++) {
 		for (j = 0; j < BITMAP_XM; j++) {
-			dest.x = (j + screen_width - BITMAP_XM) * 16 * scaling;
-			dest.y = (i + screen_height - BITMAP_YM) * 16 * scaling;
+			dest.x = (j + screen_width - BITMAP_XM) * 16 ;
+			dest.y = (i + screen_height - BITMAP_YM) * 16 ;
 			//surface = SDL_DisplayFormat(level->tile[level->tile[tile_screen[i][j]].animation[tile_anim]].tiledata);
 			//SDL_BlitSurface(surface, &src, screen, &dest);
 			//SDL_FreeSurface(surface);
@@ -299,10 +299,10 @@ display_sprite(TITUS_level *level, TITUS_sprite *spr) {
     SDL_Surface *image;
     SDL_Rect src, dest;
     if (!spr->enabled) {
-        return;
+        return 0;
     }
     if (spr->invisible) {
-        return;
+        return 0;
     }
     spr->visible = false;
     //At this point, the buffer should be the correct size
@@ -318,12 +318,9 @@ display_sprite(TITUS_level *level, TITUS_sprite *spr) {
       (dest.x + spr->spritedata->width < 0) || //Left for the screen
       (dest.y + spr->spritedata->height < 0) || //Above the screen
       (dest.y >= screen_height * 16)) { //Below the screen
-        return;
+        return 0;
     }
 
-	dest.x *= scaling;
-	dest.y *= scaling;
-	
 	image = sprite_from_cache(level, spr);
 /*	
     if ((spr->flipped != spr->flipped_last) ||
@@ -352,11 +349,11 @@ display_sprite(TITUS_level *level, TITUS_sprite *spr) {
         src.h -= src.y;
         dest.y = 0;
     }
-    if (dest.x + src.w > screen_width * 16 * scaling) {
-        src.w = screen_width * 16 * scaling - dest.x;
+    if (dest.x + src.w > screen_width * 16 ) {
+        src.w = screen_width * 16  - dest.x;
     }
-    if (dest.y + src.h > screen_height * 16 * scaling) {
-        src.h = screen_height * 16 * scaling - dest.y;
+    if (dest.y + src.h > screen_height * 16 ) {
+        src.h = screen_height * 16  - dest.y;
     }
     
 
@@ -417,23 +414,6 @@ SDL_Surface *sprite_from_cache(TITUS_level *level, TITUS_sprite *spr) {
 		}
 		return spritedata->spritebuffer[index]->data;
 	}
-}
-			
-		
-int flip_screen(bool slow) {
-    int tick = SDL_GetTicks();
-    SDL_Flip(screen);
-    int oldtick = tick;
-    tick = SDL_GetTicks();
-    SUBTIME[14] = tick - oldtick;
-    
-#if defined(_DINGUX) || defined(__vita__)
-    if (slow) {
-        NO_FAST_CPU(slow);
-    }
-#else
-    NO_FAST_CPU(slow);
-#endif
 }
 
 /*
@@ -526,6 +506,22 @@ void NO_FAST_CPU(bool slow) {
 	LAST_CLOCK = tick2;
 
     SUBTIME[15] = LAST_CLOCK - tick;
+}
+
+int flip_screen(bool slow) {
+    int tick = SDL_GetTicks();
+    SDL_Flip(screen);
+    int oldtick = tick;
+    tick = SDL_GetTicks();
+    SUBTIME[14] = tick - oldtick;
+    
+#if defined(_DINGUX) || defined(__vita__)
+    if (slow) {
+        NO_FAST_CPU(slow);
+    }
+#else
+    NO_FAST_CPU(slow);
+#endif
 }
 
 
@@ -624,18 +620,18 @@ DISPLAY_ENERGY(TITUS_level *level) {
     uint8 i;
     SDL_Rect dest;
     for (i = 0; i < level->player.hp; i++) { //Draw big bars (4px*16px, spacing 4px)
-        dest.x = offset * scaling;
-        dest.y = 9 * scaling;
-        dest.w = 4 * scaling;
-        dest.h = 16 * scaling;
+        dest.x = offset ;
+        dest.y = 9 ;
+        dest.w = 4 ;
+        dest.h = 16 ;
         SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, 255, 255, 255));
         offset += 8;
     }
     for (i = 0; i < MAXIMUM_ENERGY - level->player.hp; i++) { //Draw small bars (4px*4px, spacing 4px)
-        dest.x = offset * scaling;
-        dest.y = 15 * scaling;
-        dest.w = 4 * scaling;
-        dest.h = 4 * scaling;
+        dest.x = offset ;
+        dest.y = 15 ;
+        dest.w = 4 ;
+        dest.h = 4 ;
         SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, 255, 255, 255));
         offset += 8;
     }

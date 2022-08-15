@@ -32,8 +32,8 @@
 #include "SDL/SDL.h"
 #include "definitions.h"
 
-SDL_Surface *screen; //Backbuffer
+extern SDL_Surface *screen; //Backbuffer
 //SDL_Surface *tilescreen; //Tile screen
-uint8 tile_screen[12][20];
+extern uint8 tile_screen[12][20];
 
 #endif

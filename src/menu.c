@@ -88,7 +88,7 @@ int viewmenu(char * menufile, int menuformat) {
         break;
 
     case 2: //256 color
-        surface = SDL_CreateRGBSurface(SDL_SWSURFACE, 320 * scaling, 200 * scaling, 8, 0, 0, 0, 0);
+        surface = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 200, 8, 0, 0, 0, 0);
         palette = (surface->format)->palette;
         if (palette) {
             for (i = 0; i < 256; i++) {
@@ -101,29 +101,9 @@ int viewmenu(char * menufile, int menuformat) {
         }
 
         tmpchar = (char *)surface->pixels;
-		if (scaling == 1) {
-			for (i = 256 * 3; i < 256 * 3 + 320*200; i++) {
-				*tmpchar = menudata[i];
-				tmpchar++;
-			}
-        } else {
-			//1 rgb image
-			for (i = 0; i < 200; i++) {
-				for (j = 0; j < 320; j++) {
-					for (h2 = 0; h2 < scaling; h2++) {
-						for (w2 = 0; w2 < scaling; w2++) {
-							*tmpchar = menudata[256 * 3 + i*320+j];
-							tmpchar++; //One pixel right
-						}
-						tmpchar -= scaling; //Back to first pixel that line
-						tmpchar += 320 * scaling; //One line down
-					}
-					tmpchar -= scaling * scaling * 320; //Back to first line, first pixel
-					tmpchar += scaling; //Next scaling*scaling pixel
-				}
-				tmpchar -= 320 * scaling; //New line
-				tmpchar += scaling * scaling * 320;
-			}
+		for (i = 256 * 3; i < 256 * 3 + 320*200; i++) {
+			*tmpchar = menudata[i];
+			tmpchar++;
 		}
 
         image = SDL_DisplayFormat(surface);
@@ -146,27 +126,27 @@ int viewmenu(char * menufile, int menuformat) {
 
     if (game == 0) { //Titus
 
-        sel[0].x = 120 * scaling;
-        sel[0].y = 160 * scaling;
-        sel[0].w = 8 * scaling;
-        sel[0].h = 8 * scaling;
+        sel[0].x = 120;
+        sel[0].y = 160;
+        sel[0].w = 8;
+        sel[0].h = 8;
 	
-        sel[1].x = 120 * scaling;
-        sel[1].y = 173 * scaling;
-        sel[1].w = 8 * scaling;
-        sel[1].h = 8 * scaling;
+        sel[1].x = 120;
+        sel[1].y = 173;
+        sel[1].w = 8;
+        sel[1].h = 8;
 
     } else if (game == 1) { //Moktar
 
-        sel[0].x = 130 * scaling;
-        sel[0].y = 167 * scaling;
-        sel[0].w = 8 * scaling;
-        sel[0].h = 8 * scaling;
+        sel[0].x = 130;
+        sel[0].y = 167;
+        sel[0].w = 8;
+        sel[0].h = 8;
 	
-        sel[1].x = 130 * scaling;
-        sel[1].y = 180 * scaling;
-        sel[1].w = 8 * scaling;
-        sel[1].h = 8 * scaling;
+        sel[1].x = 130;
+        sel[1].y = 180;
+        sel[1].w = 8;
+        sel[1].h = 8;
 
     }
 

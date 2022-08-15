@@ -1188,7 +1188,7 @@ GAL_FORM(TITUS_level *level, TITUS_enemy *enemy) { //Enemy animation
     if ((enemy->dying & 0x03) != 0) {
         enemy->sprite.visible = false;
         enemy->visible = true;
-        return;
+        return 0;
     }
     enemy->trigger = false;
     image = enemy->sprite.animation; //Animation pointer
@@ -1197,7 +1197,7 @@ GAL_FORM(TITUS_level *level, TITUS_enemy *enemy) { //Enemy animation
     }
     if (*image == 0x55AA) {
         enemy->sprite.invisible = true;
-        return;
+        return 0;
     }
     enemy->trigger = ((*image & 0x2000) != 0);
     updateenemysprite(level, enemy, (*image & 0x00FF) + FIRST_NMI, true);

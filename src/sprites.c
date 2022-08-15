@@ -37,6 +37,8 @@
 #include "globals.h"
 #include "definitions.h"
 
+void animate_sprite(TITUS_level *level, TITUS_sprite *spr);
+
 SDL_Surface * copysurface(SDL_Surface * original, bool flip, bool flash){
     int i, j;
 
@@ -79,13 +81,12 @@ SDL_Surface * SDL_LoadSprite(unsigned char * first, char width, char height, uns
     unsigned int i;
     int j, h, w;
 
-    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width * scaling, height * scaling, pixelformat->BitsPerPixel, pixelformat->Rmask, pixelformat->Gmask, pixelformat->Bmask, pixelformat->Amask);
+    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width , height , pixelformat->BitsPerPixel, pixelformat->Rmask, pixelformat->Gmask, pixelformat->Bmask, pixelformat->Amask);
     copypixelformat(surface->format, pixelformat);
 
     tmpchar = (char *)surface->pixels;
     //if (surface->format->BitsPerPixel == 8) {
-    if (scaling == 1) {
-        for (i = offset; i < offset + groupsize; i++) {
+    for (i = offset; i < offset + groupsize; i++) {
             for (j = 7; j >= 0; j--) {
                 *tmpchar = (first[i] >> j) & 0x01;
                 *tmpchar += (first[i + groupsize] >> j << 1) & 0x02;
@@ -93,30 +94,7 @@ SDL_Surface * SDL_LoadSprite(unsigned char * first, char width, char height, uns
                 *tmpchar += (first[i + groupsize * 3] >> j << 3) & 0x08;
                 tmpchar++;
             }
-        }
-    } else {
-        for (i = offset; i < offset + groupsize; i++) {
-			for (j = 7; j >= 0; j--) {
-				for (h = 0; h < scaling; h++) {
-					for (w = 0; w < scaling; w++) {
-						*tmpchar = (first[i] >> j) & 0x01;
-						*tmpchar += (first[i + groupsize] >> j << 1) & 0x02;
-						*tmpchar += (first[i + groupsize * 2] >> j << 2) & 0x04;
-						*tmpchar += (first[i + groupsize * 3] >> j << 3) & 0x08;
-						tmpchar++; //One pixel right
-					}
-					tmpchar -= scaling; //Back to first pixel that line
-					tmpchar += width * scaling; //One line down
-				}
-				tmpchar -= scaling * scaling * width; //Back to first line, first pixel
-				tmpchar += scaling; //Next scaling*scaling pixel
-				if (((i - offset) * 8 + 8 - j) % width == 0) {
-					tmpchar -= width * scaling; //New line
-					tmpchar += scaling * scaling * width;
-				}
-			}
-        }
-    }
+	}
 
     return(surface);
 }
@@ -214,7 +192,7 @@ SDL_Surface * SDL_LoadTile(TITUS_level *level, unsigned char * first, int i, SDL
     SDL_Surface *surface2 = NULL;
     char *tmpchar;
     int j, k, w, h, w2, h2;
-    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, 16 * scaling, 16 * scaling, 8, 0, 0, 0, 0);
+    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, 16 , 16 , 8, 0, 0, 0, 0);
 
     copypixelformat(surface->format, pixelformat);
 
@@ -226,40 +204,16 @@ SDL_Surface * SDL_LoadTile(TITUS_level *level, unsigned char * first, int i, SDL
 	}
 
     tmpchar = (char *)surface->pixels;
-    if (scaling == 1) {
-        for (j = i; j < i + 0x20; j++) { //4 mono images, 32 bytes in each (16*16 pixels -> 256 bits -> 32 bytes)
-            for (k = 7; k >= 0; k--) {
+	for (j = i; j < i + 0x20; j++) { //4 mono images, 32 bytes in each (16*16 pixels -> 256 bits -> 32 bytes)
+		for (k = 7; k >= 0; k--) {
                 *tmpchar = (first[j] >> k) & 0x01;
                 *tmpchar += (first[j + 0x20] >> k << 1) & 0x02;
                 *tmpchar += (first[j + 0x40] >> k << 2) & 0x04;
                 *tmpchar += (first[j + 0x60] >> k << 3) & 0x08;
                 tmpchar++;
-			}
-        }
-    } else {
-		//4 mono images, 32 bytes in each (16*16 pixels -> 256 bits -> 32 bytes), 2 bytes each line
-		for (h = 0; h < 16; h++) {
-			for (w = 0; w < 2; w++) {
-				for (k = 7; k >= 0; k--) {
-					for (h2 = 0; h2 < scaling; h2++) {
-						for (w2 = 0; w2 < scaling; w2++) {
-							*tmpchar = (first[i+h*2+w] >> k) & 0x01;
-							*tmpchar += (first[i+h*2+w + 0x20] >> k << 1) & 0x02;
-							*tmpchar += (first[i+h*2+w + 0x40] >> k << 2) & 0x04;
-							*tmpchar += (first[i+h*2+w + 0x60] >> k << 3) & 0x08;
-							tmpchar++; //One pixel right
-						}
-						tmpchar -= scaling; //Back to first pixel that line
-						tmpchar += 16 * scaling; //One line down
-					}
-					tmpchar -= scaling * scaling * 16; //Back to first line, first pixel
-					tmpchar += scaling; //Next scaling*scaling pixel
-				}
-			}
-			tmpchar -= 16 * scaling; //New line
-			tmpchar += scaling * scaling * 16;
-        }
+		}
 	}
+
     surface2 = SDL_DisplayFormat(surface);
     SDL_FreeSurface(surface);
     return(surface2);
@@ -333,7 +287,7 @@ SPRITES_ANIMATION(TITUS_level *level) {
     }
 }
     
-animate_sprite(TITUS_level *level, TITUS_sprite *spr) {
+void animate_sprite(TITUS_level *level, TITUS_sprite *spr) {
     if (!spr->visible) return; //Not on screen?
     if (!spr->enabled) return;
     if (spr->number == (FIRST_OBJET+26)) { //Cage

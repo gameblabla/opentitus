@@ -45,8 +45,6 @@ int readconfig(char *configfile) {
     levelcount = 0;
     spritefile[0] = 0;
     devmode = 0;
-	scaling = 1;
-    AMIGA_LINES = false;
     FILE *ifp = fopen (configfile, "rt");
     if (ifp == NULL) {
         fprintf(stderr, "Error: Can't open config file: %s!\n", configfile);
@@ -110,8 +108,6 @@ int readconfig(char *configfile) {
             sscanf (line, "%*s %255d", &resheight);
         else if (strcmp (tmp, "devmode") == 0)
             sscanf (line, "%*s %255d", &devmode);
-        else if (strcmp (tmp, "scaling") == 0)
-            sscanf (line, "%*s %255d", &scaling);
         else if (strcmp (tmp, "bitdepth") == 0)
             sscanf (line, "%*s %255d", &bitdepth);
         else if (strcmp (tmp, "ingamewidth") == 0)

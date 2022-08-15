@@ -37,7 +37,7 @@
 
 int move_objects(TITUS_level *level) {
 
-    if (GRAVITY_FLAG == 0) return; //Skip execution if there are no active objects
+    if (GRAVITY_FLAG == 0) return 0; //Skip execution if there are no active objects
 
     TITUS_object *off_object;
     uint8 i, hflag, fflag, max_speed;
@@ -323,28 +323,28 @@ int shock(TITUS_level *level, TITUS_object *object) { //Falling object versus pl
     TITUS_player *player = &(level->player);
 
     //Quick test
-    if (object->mass < 10) return;
-    if (player->sprite.speedY >= MAX_Y*16) return;
+    if (object->mass < 10) return 0;
+    if (player->sprite.speedY >= MAX_Y*16) return 0;
     if (abs(player->sprite.y - object->sprite.y) >= 32) {
-        return;
+        return 0;
     }
     if (abs(player->sprite.x - object->sprite.x) >= 32) {
-        return;
+        return 0;
     }
 
     //Test X
     if (object->sprite.x > player->sprite.x) { //Object center is right for player
-        if (object->sprite.x > player->sprite.x + 24) return; //Object is too far right
+        if (object->sprite.x > player->sprite.x + 24) return 0; //Object is too far right
     } else { //Object center is left for center
-        if (object->sprite.x + object->sprite.spritedata->collwidth < player->sprite.x) return; //Return if object is too far left
+        if (object->sprite.x + object->sprite.spritedata->collwidth < player->sprite.x) return 0; //Return if object is too far left
     }    
     
     //Test Y
     
     if (object->sprite.y < player->sprite.y) { //Object bottom is above player bottom
-        if (object->sprite.y <= player->sprite.y - 32) return; //Return if object is completely above the player
+        if (object->sprite.y <= player->sprite.y - 32) return 0; //Return if object is completely above the player
     } else { //Object bottom is below player bottom
-        if (object->sprite.y - object->sprite.spritedata->collheight + 1 >= player->sprite.y) return; //Return if object is completely below the player
+        if (object->sprite.y - object->sprite.spritedata->collheight + 1 >= player->sprite.y) return 0; //Return if object is completely below the player
     }
 
     //Hit!

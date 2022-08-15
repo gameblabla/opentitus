@@ -156,11 +156,11 @@ int playtitus(int firstlevel){
         }
 
 		sky_colour = level.tile[0].tiledata->format->colorkey;
-		if (!AMIGA_LINES) {
+		#ifdef NOAMIGA
 			for (i = 0; i < 256; i++) {
 				SDL_SetColorKey(level.tile[i].tiledata, 0, 0); //Clear transparent colour
 			}
-		}
+		#endif
 
         first = true;
 #ifdef __vita__
@@ -460,7 +460,7 @@ int SCREEN_5C() {
             if (key == SDLK_LCTRL) continue;
             if (key == SDLK_LALT) continue;
             if (key == SDLK_e) continue;
-            if (keystate[key]) return;
+            if (keystate[key]) return 0;
         }
         if (game == 0) { //Titus
             retval = viewimage(titusfinishfile, titusfinishformat, 1, 0);

@@ -106,18 +106,6 @@ int move_player(TITUS_level *level) {
                 } else {
                     GODMODE = false;
                     NOCLIP = false;
-                    if (orig_sky_colour[level->levelnumber] != 0) { //Toggle amiga lines
-                        AMIGA_LINES = !AMIGA_LINES;
-                        if (AMIGA_LINES) {
-                            for (i = 0; i < 256; i++) {
-                                SDL_SetColorKey(level->tile[i].tiledata, SDL_SRCCOLORKEY|SDL_RLEACCEL, sky_colour); //TESTING: Set transparent colour
-                            }
-                        } else {
-                            for (i = 0; i < 256; i++) {
-                                SDL_SetColorKey(level->tile[i].tiledata, 0, 0); //Clear transparent colour
-                            }
-                        }
-                    }
                 }
 #ifdef __vita__
             } else if (event.jbutton.button == KEY_STATUS) {
@@ -133,17 +121,6 @@ int move_player(TITUS_level *level) {
                 CASE_DEAD_IM(level);
                 RESETLEVEL_FLAG--;
                 return;
-            } else if ((event.key.keysym.sym == KEY_CHEAT) && (orig_sky_colour[level->levelnumber] != 0) && (devmode != 1)) { //Toggle amiga lines
-                AMIGA_LINES = !AMIGA_LINES;
-                if (AMIGA_LINES) {
-                    for (i = 0; i < 256; i++) {
-                        SDL_SetColorKey(level->tile[i].tiledata, SDL_SRCCOLORKEY|SDL_RLEACCEL, sky_colour); //TESTING: Set transparent colour
-                    }
-                } else {
-                    for (i = 0; i < 256; i++) {
-                        SDL_SetColorKey(level->tile[i].tiledata, 0, 0); //Clear transparent colour
-                    }
-                }
 #ifdef DEBUG_VERSION
 //Will display debug information
             } else if (event.key.keysym.sym == KEY_MUSIC) {
@@ -204,17 +181,6 @@ int move_player(TITUS_level *level) {
 					startmusic();
 #endif
 				}
-            } else if ((event.key.keysym.sym == SDLK_l) && (orig_sky_colour[level->levelnumber] != 0)) { //Toggle amiga lines
-				AMIGA_LINES = !AMIGA_LINES;
-				if (AMIGA_LINES) {
-					for (i = 0; i < 256; i++) {
-						SDL_SetColorKey(level->tile[i].tiledata, SDL_SRCCOLORKEY|SDL_RLEACCEL, sky_colour); //TESTING: Set transparent colour
-					}
-				} else {
-					for (i = 0; i < 256; i++) {
-						SDL_SetColorKey(level->tile[i].tiledata, 0, 0); //Clear transparent colour
-					}
-				}
 #ifdef DEBUG_VERSION
 //Will display debug information
             } else if (event.key.keysym.sym == KEY_DEBUG) {
@@ -247,11 +213,11 @@ int move_player(TITUS_level *level) {
     if (keystate[KEY_F1] && (RESETLEVEL_FLAG == 0)) { //F1 = suicide
         CASE_DEAD_IM(level);
         RESETLEVEL_FLAG--;
-        return;
+        return 0;
     }
     if (keystate[KEY_F2]) { //F2 = game over
         GAMEOVER_FLAG = true;
-        return;
+        return 0;
     }
     if (keystate[KEY_E]) { //E = display energy
         BAR_FLAG = 50;
@@ -293,7 +259,7 @@ int move_player(TITUS_level *level) {
         }
         player->sprite.x += (player->sprite.speedX >> 4);
         player->sprite.y += (player->sprite.speedY >> 4);
-        return;
+        return 0;
     }
 
     if (CHOC_FLAG != 0) {
@@ -629,7 +595,7 @@ BRK_COLLISION(TITUS_level *level) { //Collision detection between player and til
                 BLOCK_XXPRG(level, hflag, tileY, tileX);
             }
             if (tileY == 0) {
-                return;
+                return 0;
             }
             tileY--;
             height -= 16;
@@ -650,12 +616,12 @@ static int TAKE_BLK_AND_YTEST(TITUS_level *level, int16 tileY, uint8 tileX) {
     if ((player->sprite.y <= MAP_LIMIT_Y) || (tileY < -1)) { //if player is too high (<= -1), skip test
         ARAB_TOMBE(level);
         YFALL = 0xFF;
-        return;
+        return 0;
     }
     if (tileY + 1 >= level->height) { //if player is too low, skip test
         ARAB_TOMBE(level);
         YFALL = 0xFF;
-        return;
+        return 0;
     }
     if (tileY == -1) { //In order to fall down in the right chamber if jumping above level 8
         tileY = 0;
@@ -668,7 +634,7 @@ static int TAKE_BLK_AND_YTEST(TITUS_level *level, int16 tileY, uint8 tileX) {
     }
     //Test the tile on his head
     if ((tileY < 1) || (player->sprite.speedY > 0)) {
-        return;
+        return 0;
     }
     horiz = get_horizflag(level, tileY, tileX);
     ceil = get_ceilflag(level, tileY - 1, tileX);
@@ -850,7 +816,7 @@ ARAB_TOMBE(TITUS_level *level) {
     TITUS_player *player = &(level->player);
     SAUT_FLAG = 6;
     if (KICK_FLAG != 0) {
-        return;
+        return 0;
     }
     XACCELERATION(player, MAX_X*16);
     YACCELERATION(player, MAX_Y*16);
@@ -935,7 +901,7 @@ static int BLOCK_YYPRG(TITUS_level *level, uint8 floor, uint8 floor_above, uint8
         //Skip if walking/crawling
         if (CHOC_FLAG != 0) {
             ARAB_TOMBE_F(); //Free fall
-            return;
+            return 0;
         }
         order = LAST_ORDER & 0x0F;
         if ((order == 1) ||
@@ -943,7 +909,7 @@ static int BLOCK_YYPRG(TITUS_level *level, uint8 floor, uint8 floor_above, uint8
           (order == 7) ||
           (order == 8)) {
             ARAB_BLOCK_YU(player); //Stop fall
-            return;
+            return 0;
         }
         if (order == 5) { // action baisse
             ARAB_TOMBE_F(); //Free fall
@@ -953,11 +919,11 @@ static int BLOCK_YYPRG(TITUS_level *level, uint8 floor, uint8 floor_above, uint8
         if (floor_above != 6) { //ladder
             if (order == 0) { //action repos
                 ARAB_BLOCK_YU(player); //Stop fall
-                return;
+                return 0;
             }
             if (((keystate[KEY_UP] || buttonPressed(KEY_UP)) || (keystate[KEY_JUMP] || buttonPressed(KEY_JUMP))) && (order == 6)) { //action UP + climb ladder
                 ARAB_BLOCK_YU(player); //Stop fall
-                return;
+                return 0;
             }
         }
 
@@ -1007,7 +973,7 @@ ARAB_BLOCK_YU(TITUS_player *player) {
     player->GLISSE = 0;
     if (player->sprite.speedY < 0) {
         YFALL = YFALL | 0x01;
-        return;
+        return 0;
     }
     player->sprite.y = player->sprite.y & 0xFFF0;
     player->sprite.speedY = 0;
@@ -1659,7 +1625,7 @@ COLLISION_TRP(TITUS_level *level) {
             if (elevator[i].sprite.speedY > 0) { //Going down
                 player->sprite.y += elevator[i].sprite.speedY;
             }
-            return;
+            return 0;
         }
     }
 }
@@ -1670,11 +1636,11 @@ COLLISION_OBJET(TITUS_level *level) {
     TITUS_player *player = &(level->player);
     TITUS_object *off_object;
     if (player->sprite.speedY < 0) {
-        return;
+        return 0;
     }
     //Collision with a sprite
     if (!(SPRITES_VS_SPRITES(level, &(player->sprite), &(level->spritedata[0]), &off_object))) { //check if player stands on an object, use sprite[0] (rest) as collision size (first player tile)
-        return;
+        return 0;
     }
     player->sprite.y = off_object->sprite.y - off_object->sprite.spritedata->collheight;
     //If the foot is placed on a spring, it must be soft!

@@ -175,7 +175,7 @@ int loadfonts(void) {
         font->type[i + CHAR_a] = 3; //Surface pointer
     }
     
-    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, 8 * scaling, 12 * scaling, 8, 0, 0, 0, 0); //" "
+    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, 8, 12, 8, 0, 0, 0, 0); //" "
     if (surface == NULL) {
         sprintf(lasterror, "Error: Not enough memory to load fonts!\n");
         freepixelformat(&(pixelformat));
@@ -183,7 +183,7 @@ int loadfonts(void) {
     }
     copypixelformat(surface->format, pixelformat);
     tmpchar = (char *)surface->pixels;
-    for (i = 0; i < 96 * scaling * scaling; i++) {
+    for (i = 0; i < 96; i++) {
         *tmpchar = 0x01;
         tmpchar++;
     }
@@ -211,7 +211,7 @@ SDL_Surface * SDL_LoadChar(unsigned char * fontdata, int offset, SDL_PixelFormat
     SDL_Surface *surface2 = NULL;
     char *tmpchar;
     int i, j, k, h2, w2;
-    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, 8 * scaling, 12 * scaling, 8, 0, 0, 0, 0);
+    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, 8 , 12, 8, 0, 0, 0, 0);
     if (surface == NULL) {
         sprintf(lasterror, "Error: Not enough memory to load fonts!\n");
         return (NULL);
@@ -220,8 +220,7 @@ SDL_Surface * SDL_LoadChar(unsigned char * fontdata, int offset, SDL_PixelFormat
     copypixelformat(surface->format, pixelformat);
 
     tmpchar = (char *)surface->pixels;
-    if (scaling == 1) {
-		for (i = offset * 48; i < offset * 48 + 12; i++) {//12
+	for (i = offset * 48; i < offset * 48 + 12; i++) {//12
 			for (j = 7; j >= 0; j--) {
 				*tmpchar = (fontdata[i] >> j) & 0x01;
 				*tmpchar += (fontdata[i + 12] >> j << 1) & 0x02;
@@ -229,29 +228,7 @@ SDL_Surface * SDL_LoadChar(unsigned char * fontdata, int offset, SDL_PixelFormat
 				*tmpchar += (fontdata[i + 12 * 3] >> j << 3) & 0x08;
 				tmpchar++;
 			}
-        }
-    } else {
-		//4 mono images, 12 bytes in each (8*12 pixels -> 96 bits -> 12 bytes), 1 byte each line
-		for (i = offset * 48; i < offset * 48 + 12; i++) {//12
-			for (k = 7; k >= 0; k--) {
-				for (h2 = 0; h2 < scaling; h2++) {
-					for (w2 = 0; w2 < scaling; w2++) {
-						*tmpchar = (fontdata[i] >> k) & 0x01;
-						*tmpchar += (fontdata[i + 12] >> k << 1) & 0x02;
-						*tmpchar += (fontdata[i + 12 * 2] >> k << 2) & 0x04;
-						*tmpchar += (fontdata[i + 12 * 3] >> k << 3) & 0x08;
-						tmpchar++; //One pixel right
-					}
-					tmpchar -= scaling; //Back to first pixel that line
-					tmpchar += 8 * scaling; //One line down
-				}
-				tmpchar -= scaling * scaling * 8; //Back to first line, first pixel
-				tmpchar += scaling; //Next scaling*scaling pixel
-			}
-			tmpchar -= 8 * scaling; //New line
-			tmpchar += scaling * scaling * 8;
-        }
-	}
+    }
     surface2 = SDL_DisplayFormat(surface);
     if (surface2 == NULL) {
         sprintf(lasterror, "Error: Not enough memory to load fonts!\n");
@@ -492,8 +469,8 @@ int SDL_Print_Text(uint8 *text, int x, int y){
     
     src.x = 0;
     src.y = 0;
-    dest.x = x * scaling;
-    dest.y = y * scaling;
+    dest.x = x;
+    dest.y = y;
 
     for (i = 0; i < strlen(text); i++) {
         j = i;
@@ -521,7 +498,7 @@ int SDL_Print_Text(uint8 *text, int x, int y){
             src.w = image->w;
             src.h = image->h;
             SDL_BlitSurface(image, &src, screen, &dest);
-            dest.x += 8 * scaling;
+            dest.x += 8;
             if (text[j] > 0xBF) { //If first letter is larger than 10111111: this is multibyte. Make sure "i" is in the last byte
                 do {
                     if (j == strlen(text) - 1) {
@@ -544,7 +521,7 @@ int SDL_Print_Text(uint8 *text, int x, int y){
             src.w = image->w;
             src.h = image->h;
             SDL_BlitSurface(image, &src, screen, &dest);
-            dest.x += 8 * scaling;
+            dest.x += 8;
             break;
         case 4: //Invalid UTF-8
             sprintf(lasterror, "Error: Invalid UTF-8!\n");
@@ -555,7 +532,7 @@ int SDL_Print_Text(uint8 *text, int x, int y){
 }
 
 int viewintrotext(){
-    int retval;
+    /*int retval;
     char tmpstring[41];
     time_t rawtime;
     struct tm *timeinfo;
@@ -574,12 +551,12 @@ int viewintrotext(){
     retval = waitforbutton();
     if (retval < 0)
         return retval;
-/*
-    SDL_Print_Text("     YEAAA . . .", 0, 5 * 12);
-    sprintf(tmpstring, "YOU ARE STILL PLAYING MOKTAR IN %d !!", timeinfo->tm_year + 1900);
-    SDL_Print_Text(tmpstring, 0, 6 * 12);
-    SDL_Print_Text(" PROGRAMMED IN 1991 ON AT .286 12MHZ.", 0, 12 * 12);
-*/
+//
+ //   SDL_Print_Text("     YEAAA . . .", 0, 5 * 12);
+//    sprintf(tmpstring, "YOU ARE STILL PLAYING MOKTAR IN %d !!", timeinfo->tm_year + 1900);
+ //   SDL_Print_Text(tmpstring, 0, 6 * 12);
+ //   SDL_Print_Text(" PROGRAMMED IN 1991 ON AT .286 12MHZ.", 0, 12 * 12);
+//
     //SDL_Print_Text("                                        ", 0, 13 * 12);
     //SDL_Print_Text(" PROGRAMMED IN 1991 ON AT .286 12MHZ.", 0, 10 * 12);
     SDL_Print_Text("REPROGRAMMED IN 2011 ON X86_64 2.40 GHZ.", 0, 12 * 12);
@@ -590,6 +567,6 @@ int viewintrotext(){
     retval = waitforbutton();
     if (retval < 0)
         return retval;
-
+*/
     return (0);
 }
