@@ -469,7 +469,7 @@ int SDL_Print_Text(uint8 *text, int x, int y){
     
     src.x = 0;
     src.y = 0;
-    dest.x = x;
+    dest.x = x + 16;
     dest.y = y;
 
     for (i = 0; i < strlen(text); i++) {
@@ -546,7 +546,7 @@ int viewintrotext(){
     SDL_Print_Text(" PROGRAMMED IN 1991 ON AT .286 12MHZ.", 0, 12 * 12);
     SDL_Print_Text("   . . . ENJOY MOKTAR ADVENTURE !!", 0, 13 * 12);
 
-    SDL_Flip(screen);
+    Flip_Titus();
 
     retval = waitforbutton();
     if (retval < 0)
@@ -562,7 +562,7 @@ int viewintrotext(){
     SDL_Print_Text("REPROGRAMMED IN 2011 ON X86_64 2.40 GHZ.", 0, 12 * 12);
     //SDL_Print_Text("   . . . ENJOY MOKTAR ADVENTURE !!", 0, 13 * 12);
 
-    SDL_Flip(screen);
+    Flip_Titus();
 
     retval = waitforbutton();
     if (retval < 0)

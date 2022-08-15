@@ -74,7 +74,8 @@ int viewmenu(char * menufile, int menuformat) {
 
     SDL_Rect src, dest;
     SDL_Rect sel[2];
-
+    SDL_Rect sel_dest[2];
+    
     retval = unSQZ(menufile, &menudata);
 
     if (retval < 0) {
@@ -121,8 +122,10 @@ int viewmenu(char * menufile, int menuformat) {
     src.w = image->w;
     src.h = image->h;
 	
-    dest.x = 0;
+    dest.x = 16;
     dest.y = 0;
+    dest.w = image->w;
+    dest.h = image->h;
 
     if (game == 0) { //Titus
 
@@ -149,7 +152,12 @@ int viewmenu(char * menufile, int menuformat) {
         sel[1].h = 8;
 
     }
-
+    
+    sel_dest[0] = sel[0];
+    sel_dest[0].x += 16;
+    sel_dest[1] = sel[1];
+    sel_dest[1].x += 16;
+    
     tick_start = SDL_GetTicks();
 
     while (image_alpha < 255) { //Fade in
@@ -196,9 +204,9 @@ int viewmenu(char * menufile, int menuformat) {
         SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
         SDL_SetAlpha(image, SDL_SRCALPHA, image_alpha);
         SDL_BlitSurface(image, &src, screen, &dest);
-        SDL_BlitSurface(image, &sel[1], screen, &sel[0]);
-        SDL_BlitSurface(image, &sel[0], screen, &sel[selection]);
-        SDL_Flip(screen);
+        SDL_BlitSurface(image, &sel[1], screen, &sel_dest[0]);
+        SDL_BlitSurface(image, &sel[0], screen, &sel_dest[selection]);
+        Flip_Titus();
         titus_sleep();
 
 #ifdef AUDIO_MIKMOD_SINGLETHREAD
@@ -269,9 +277,9 @@ int viewmenu(char * menufile, int menuformat) {
 
         SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
         SDL_BlitSurface(image, &src, screen, &dest);
-        SDL_BlitSurface(image, &sel[1], screen, &sel[0]);
-        SDL_BlitSurface(image, &sel[0], screen, &sel[selection]);
-        SDL_Flip(screen);
+        SDL_BlitSurface(image, &sel[1], screen, &sel_dest[0]);
+        SDL_BlitSurface(image, &sel[0], screen, &sel_dest[selection]);
+        Flip_Titus();
         titus_sleep();
 
 #ifdef AUDIO_MIKMOD_SINGLETHREAD
@@ -355,9 +363,9 @@ int viewmenu(char * menufile, int menuformat) {
         SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
         SDL_SetAlpha(image, SDL_SRCALPHA, 255 - image_alpha);
         SDL_BlitSurface(image, &src, screen, &dest);
-        SDL_FillRect(screen, &sel[0], 0); //SDL_MapRGB(surface->format, 0, 0, 0));
-        SDL_BlitSurface(image, &sel[0], screen, &sel[selection]);
-        SDL_Flip(screen);
+        SDL_FillRect(screen, &sel_dest[0], 0); //SDL_MapRGB(surface->format, 0, 0, 0));
+        SDL_BlitSurface(image, &sel[0], screen, &sel_dest[selection]);
+        Flip_Titus();
         titus_sleep();
 
 #ifdef AUDIO_MIKMOD_SINGLETHREAD
@@ -382,7 +390,7 @@ int enterpassword(){
     char tmpchar;
 
     SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
-    SDL_Flip(screen);
+    Flip_Titus();
 
     SDL_Print_Text("CODE", 111, 80);
 
@@ -396,7 +404,7 @@ int enterpassword(){
     strncpy(code, (str != NULL) ? str : "0000", 4);
     for (char* c = code; *c = toupper(*c); ++c);
     SDL_Print_Text(code, 159, 80);
-    SDL_Flip(screen);
+    Flip_Titus();
 #else
     for (i = 0; i < 4; ) {
         while(SDL_PollEvent(&event)) { //Check all events
@@ -475,7 +483,7 @@ int enterpassword(){
         }
 #endif
         SDL_Print_Text(code, 159, 80);
-        SDL_Flip(screen);
+        Flip_Titus();
         titus_sleep();
 
 #ifdef AUDIO_MIKMOD_SINGLETHREAD
@@ -494,24 +502,24 @@ int enterpassword(){
             SDL_Print_Text("LEVEL", 103, 104);
             sprintf(code, "%d", i + 1);
             SDL_Print_Text(code, 199 - 8 * strlen(code), 104);
-            SDL_Flip(screen);
+            Flip_Titus();
             retval = waitforbutton();
 
             if (retval < 0)
                 return retval;
 
             SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
-            SDL_Flip(screen);
+            Flip_Titus();
 
             return (i + 1);
         }
     }
 
     SDL_Print_Text("!  WRONG CODE  !", 87, 104);
-    SDL_Flip(screen);
+    Flip_Titus();
     retval = waitforbutton();
 
     SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
-    SDL_Flip(screen);
+    Flip_Titus();
     return (retval);
 }

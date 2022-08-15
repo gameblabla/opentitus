@@ -148,6 +148,7 @@ int init() {
     }
 #endif
 
+/*
 #ifdef _DINGUX
     //fullscreen
     SDL_ShowCursor(SDL_DISABLE);
@@ -175,7 +176,11 @@ int init() {
         break;
     }
 #endif
+*/
 
+	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, reswidth + 32, resheight, bitdepth, 0, 0, 0, 0);
+	rl_screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, SDL_SWSURFACE | SDL_DOUBLEBUF);
+	 
     if (screen == NULL) {
         printf("Unable to set video mode: %s\n", SDL_GetError());
         return TITUS_ERROR_SDL_ERROR;
