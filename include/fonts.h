@@ -53,17 +53,16 @@ struct _TITUS_font {
     void *sub[256]; //May be malloced
 };
 
-TITUS_font *font; //Malloced
-SDL_Surface *font_undefined; //Pointer
+extern TITUS_font *font; //Malloced
+extern SDL_Surface *font_undefined; //Pointer
 
-int loadfonts(void);
-int freefonts(void);
+extern int loadfonts(void);
+extern int freefonts(void);
 
-//SDL_Surface * SDL_Text(char *text, bool inv_back);
-//int SDL_Print_Text(char *text, int x, int y, bool inv_back);
-int SDL_Print_Text(char *text, int x, int y);
 
-int viewintrotext();
+extern int SDL_Print_Text(char *text, int x, int y);
+
+extern int viewintrotext();
 
 #endif
 
