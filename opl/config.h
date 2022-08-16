@@ -4,10 +4,6 @@
 /* Define to 1 if you have the <dev/isa/spkrio.h> header file. */
 /* #undef HAVE_DEV_ISA_SPKRIO_H */
 
-#ifdef KOLIBRI
-#undef _WIN32
-#endif
-
 /* Define to 1 if you have the <dev/speaker/speaker.h> header file. */
 /* #undef HAVE_DEV_SPEAKER_SPEAKER_H */
 

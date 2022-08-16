@@ -1,0 +1,14 @@
+TARGET_LIB = libopl_vita.a
+OBJS = dbopl_light.o ioperm_sys.o opl.o opl_linux.o opl_obsd.o opl_queue.o opl_sdl.o opl_timer.o opl_win32.o
+
+PREFIX  = arm-vita-eabi
+CC      = $(PREFIX)-gcc
+AR      = $(PREFIX)-gcc-ar
+
+CFLAGS  = -Wl,-q -Wall -O2 -D__vita__ -Wno-unused-but-set-variable -I$(VITASDK)/arm-vita-eabi/include/SDL
+
+$(TARGET_LIB): $(OBJS)
+	$(AR) rcs $@ $^
+
+clean:
+	@rm -rf $(TARGET_LIB) $(OBJS)

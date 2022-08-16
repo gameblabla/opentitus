@@ -615,7 +615,7 @@ void TimerCallback(void *data)
 
     // Schedule the next timer callback.
 
-    OPL_SetCallback(delay, TimerCallback, sdlp);
+    OPL_SetCallback(13750, TimerCallback, sdlp);
 
 }
 
