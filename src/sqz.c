@@ -136,7 +136,7 @@ static int lzw_decode(unsigned char *input, int in_len, unsigned char *output, i
     unsigned int k_pos = 0;
     unsigned int k;
     unsigned int tmp_k;
-    unsigned int w;
+    unsigned int w = 0;
     unsigned int out_pos = 0;
     char addtodict = 0;
     unsigned int *dict_prefix;
@@ -260,7 +260,7 @@ static int huffman_decode(unsigned char *input, int in_len, unsigned char *outpu
     unsigned int i;
     unsigned short j;
     unsigned char bit;
-    unsigned char last;
+    unsigned char last = 0;
     unsigned int out_pos = 0;
 
     for (i = 2 + treesize; i < in_len; i++) {

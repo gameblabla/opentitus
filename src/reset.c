@@ -49,6 +49,9 @@
 //2 - Game over
 //3 - Death
 
+void SET_ALL_SPRITES(TITUS_level *level);
+void SET_DATA_NMI(TITUS_level *level);
+void MOVE_HIM(TITUS_level *level, TITUS_sprite *spr);
 
 uint8 RESET_LEVEL(TITUS_level *level) {
     TITUS_player *player = &(level->player);
@@ -80,7 +83,7 @@ uint8 RESET_LEVEL(TITUS_level *level) {
         do {
             //Animate tiles
             scroll(level);
-            BLOC_ANIMATION(level);
+            //BLOC_ANIMATION(level);
             //Move Titus/Moktar
             player->sprite.x += 3;
             MOVE_HIM(level, &(player->sprite));
@@ -103,7 +106,7 @@ uint8 RESET_LEVEL(TITUS_level *level) {
         for (i = 0; i < 16; i++) {
             MOVE_HIM(level, &(player->sprite));
             scroll(level);
-            BLOC_ANIMATION(level);
+			//BLOC_ANIMATION(level);
             TFR_SCREENM(level);
             DISPLAY_SPRITES(level);
             flip_screen(true);
@@ -114,6 +117,7 @@ uint8 RESET_LEVEL(TITUS_level *level) {
         int16 *heart = COEUR_POS; //Heart position array
         pass = false;
         do {
+			POLL_CONTROLS
             if (*heart < 0) {
                 heart += *heart; //jump back
             }
@@ -123,7 +127,7 @@ uint8 RESET_LEVEL(TITUS_level *level) {
             heart++;
 
             scroll(level);
-            BLOC_ANIMATION(level);
+            //BLOC_ANIMATION(level);
             TFR_SCREENM(level);
             DISPLAY_SPRITES(level);
             flip_screen(true);
@@ -168,6 +172,13 @@ uint8 RESET_LEVEL(TITUS_level *level) {
                     }
                 }
             }
+            
+#ifdef DREAMCAST
+			if ((state->buttons & CONT_START) || (state->buttons & CONT_A))
+            {
+				pass = true;
+			}
+#endif
 
         } while (!pass);
         //Display THE END
@@ -196,7 +207,7 @@ uint8 RESET_LEVEL(TITUS_level *level) {
 }
 
 
-MOVE_HIM(TITUS_level *level, TITUS_sprite *spr) {
+void MOVE_HIM(TITUS_level *level, TITUS_sprite *spr) {
     int16 *pointer = spr->animation + 1;
     while (*pointer < 0) {
         pointer += (*pointer / 2); //End of animation, jump back
@@ -274,7 +285,7 @@ int CLEAR_DATA(TITUS_level *level) {
 }
 
 
-SET_DATA_NMI(TITUS_level *level) {
+void SET_DATA_NMI(TITUS_level *level) {
     boss_alive = false;
     int i, anim;
     for (i = 0; i < level->enemycount; i++) {
@@ -291,7 +302,7 @@ SET_DATA_NMI(TITUS_level *level) {
     BIGNMI_POWER = NMI_POWER[level->levelid];
 }
 
-clearsprite(TITUS_sprite *spr){
+int clearsprite(TITUS_sprite *spr){
     //SDL_FreeSurface(spr->buffer);
     //spr->buffer = NULL;
     spr->enabled = false;
@@ -316,7 +327,7 @@ clearsprite(TITUS_sprite *spr){
 }
 
 
-SET_ALL_SPRITES(TITUS_level *level) {
+void SET_ALL_SPRITES(TITUS_level *level) {
     int16 i;
     TITUS_player *player = &(level->player);
     

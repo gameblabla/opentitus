@@ -581,14 +581,19 @@ int nogame_data(){
 	#if defined(DREAMCAST)
 	print_string("Make sure to put it on your SD card", 0xFFFF, 0, 24, 48, screen->pixels);
 	print_string("OR", 0xFFFF, 0, 24, 64, screen->pixels);
-	print_string("rebuild the ISO with data inside", 0xFFFF, 0, 24, 80, screen->pixels);
+	print_string("rebuild the ISO with data inside.", 0xFFFF, 0, 24, 80, screen->pixels);
+	
+	print_string("SD card needs to be formatted in", 0xFFFF, 0, 24, 96, screen->pixels);
+	print_string("FAT32 format and be plugged to the", 0xFFFF, 0, 24, 96+16, screen->pixels);
+	print_string("serial port with external adapter.", 0xFFFF, 0, 24, 96+32, screen->pixels);
+	print_string("(NOT GDEMU/ODE !)", 0xFFFF, 0, 24, 96+48, screen->pixels);
 	#elif defined(HOME_SUPPORT)
 	print_string("Make sure to put it in $HOME/.opentitus", 0xFFFF, 0, 24, 48, screen->pixels);
 	#else
 	print_string("Make sure to put it relative", 0xFFFF, 0, 24, 48, screen->pixels);
 	print_string("to the executable.", 0xFFFF, 0, 24, 64, screen->pixels);
 	#endif
-	print_string("Press any button to reset", 0xFFFF, 0, 24, 112, screen->pixels);
+	print_string("Press any button to reset", 0xFFFF, 0, 24, 176, screen->pixels);
     Flip_Titus();
 
     waitforbutton();

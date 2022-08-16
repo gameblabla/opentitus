@@ -40,6 +40,15 @@ int FX_START(int fx_number);
 int RETURN_MUSIC();
 int startmusic();
 int refreshaudio();
+int initsfx();
+
+void updatechip(int reg, int val);
+void insmaker(unsigned char *insdata, int channel);
+int load_file(char *filename, unsigned char **raw_data);
+void all_vox_zero();
+void TimerCallback(void *data);
+int FX_DRIVER();
+int FX_STOP();
 
 
 /*

@@ -63,6 +63,25 @@ int buttonPressed(int i) {
 #endif
 }
 
+static void DECELERATION(TITUS_player *player) {
+    //Stop acceleration
+    uint8 friction = (3 * 4) >> player->GLISSE;
+    int16 speed;
+    if (player->sprite.speedX < 0) {
+        speed = player->sprite.speedX + friction;
+        if (speed > 0) {
+            speed = 0;
+        }
+    } else {
+        speed = player->sprite.speedX - friction;
+        if (speed < 0) {
+            speed = 0;
+        }
+    }
+    player->sprite.speedX = speed;
+}
+
+
 int move_player(TITUS_level *level) {
     //Part 1: Check keyboard input
     //Part 2: Determine the player's action, and execute action dependent code
@@ -81,6 +100,7 @@ int move_player(TITUS_level *level) {
     SDL_PumpEvents(); //Update keyboard state
     keystate = SDL_GetKeyState(NULL);
 
+#ifndef DREAMCAST
     while(SDL_PollEvent(&event)) { //Check all events
         if (event.type == SDL_QUIT) {
             return TITUS_ERROR_QUIT;
@@ -204,6 +224,9 @@ int move_player(TITUS_level *level) {
 
         }
     }
+#endif // DREAMCAST
+    
+    
     if (keystate[KEY_ESC] || buttonPressed(KEY_ESC)) {
         return TITUS_ERROR_QUIT;
     }
@@ -238,10 +261,10 @@ int move_player(TITUS_level *level) {
     }
     //JOYSTICK(); //Handle both joystick and keyboard movement keys
 
-
+	POLL_CONTROLS
     //Part 2: Determine the player's action, and execute action dependent code
-    X_FLAG = (keystate[KEY_LEFT] || buttonPressed(KEY_LEFT)) | (keystate[KEY_RIGHT] || buttonPressed(KEY_RIGHT)); //Set if either is true
-    Y_FLAG = (keystate[KEY_UP] || buttonPressed(KEY_UP)) | (keystate[KEY_JUMP] || buttonPressed(KEY_JUMP)) | (keystate[KEY_DOWN] || buttonPressed(KEY_DOWN)); //Set if either is true
+    X_FLAG = (LEFT_BUTTON) | (RIGHT_BUTTON); //Set if either is true
+    Y_FLAG = (UP_BUTTON) | (DOWN_BUTTON); //Set if either is true
     if (NOCLIP) {
         if ((keystate[KEY_LEFT] || buttonPressed(KEY_LEFT))) {
             player->sprite.speedX = -100;
@@ -250,9 +273,9 @@ int move_player(TITUS_level *level) {
         } else {
             player->sprite.speedX = 0;
         }
-        if ((keystate[KEY_UP] || buttonPressed(KEY_UP)) || (keystate[KEY_JUMP] || buttonPressed(KEY_JUMP))) {
+        if (JUMP_BUTTON) {
             player->sprite.speedY = -100;
-        } else if ((keystate[KEY_DOWN] || buttonPressed(KEY_DOWN))) {
+        } else if (DOWN_BUTTON) {
             player->sprite.speedY = 100;
         } else {
             player->sprite.speedY = 0;
@@ -270,16 +293,17 @@ int move_player(TITUS_level *level) {
         } else {
             action = 12; //Hit
         }
-    } else {
+    } 
+    else {
         GRANDBRULE_FLAG = false;
         if (LADDER_FLAG) {
             action = 6; //Action: climb
-        } else if (!PRIER_FLAG && ((keystate[KEY_UP] || buttonPressed(KEY_UP)) || (keystate[KEY_JUMP] || buttonPressed(KEY_JUMP))) && (SAUT_FLAG == 0)) {
+        } else if (!PRIER_FLAG && (JUMP_BUTTON) && (SAUT_FLAG == 0)) {
             action = 2; //Action: jump
             if (LAST_ORDER == 5) { //Test if last order was kneestanding
                 FURTIF_FLAG = 100; //If jump after kneestanding, init silent walk timer
             }
-        } else if (PRIER_FLAG || ((SAUT_FLAG != 6) && (keystate[KEY_DOWN] || buttonPressed(KEY_DOWN)))) {
+        } else if (PRIER_FLAG || ((SAUT_FLAG != 6) && (DOWN_BUTTON))) {
             if (X_FLAG) { //Move left or right
                 action = 3; //Action: crawling
             } else {
@@ -291,7 +315,7 @@ int move_player(TITUS_level *level) {
             action = 0;  //Action: rest (no action)
         }
         //Is space button pressed?
-        if ((keystate[KEY_SPACE] || buttonPressed(KEY_SPACE)) && !PRIER_FLAG) {
+        if (THROW_BUTTON && !PRIER_FLAG) {
             if (!DROP_FLAG) {
                 if ((action == 3) || (action == 5)) { //Kneestand
                     DROPREADY_FLAG = false;
@@ -315,9 +339,9 @@ int move_player(TITUS_level *level) {
         } else { // 0 or 1
             newsensX = 0;
         }
-    } else if ((keystate[KEY_LEFT] || buttonPressed(KEY_LEFT))) {
+    } else if (LEFT_BUTTON) {
         newsensX = -1;
-    } else if ((keystate[KEY_RIGHT] || buttonPressed(KEY_RIGHT))) {
+    } else if (RIGHT_BUTTON) {
         newsensX = 1;
     } else if (SENSX == -1) {
         newsensX = -1;
@@ -435,7 +459,7 @@ int move_player(TITUS_level *level) {
     }
 }
 
-CASE_DEAD_IM (TITUS_level *level) {
+void CASE_DEAD_IM (TITUS_level *level) {
     //Kill the player immediately (spikes/water/flames etc.
     //Sets RESET_FLAG to 2, in opposite to being killed as a result of 0 HP (then RESET_FLAG is 10)
     DEC_LIFE(level);
@@ -443,7 +467,7 @@ CASE_DEAD_IM (TITUS_level *level) {
 }
 
 
-DEC_LIFE (TITUS_level *level) {
+void DEC_LIFE (TITUS_level *level) {
     //Kill the player, check for gameover, hide the energy bar
     RESETLEVEL_FLAG = 10;
     BAR_FLAG = 0;
@@ -452,7 +476,7 @@ DEC_LIFE (TITUS_level *level) {
     }
 }
     
-t_pause (TITUS_level *level) {
+int t_pause (TITUS_level *level) {
     bool pass;
     TITUS_player *player = &(level->player);
     SDL_Event event;
@@ -504,6 +528,8 @@ t_pause (TITUS_level *level) {
             }
         }
     } while (1);
+    
+    return 0;
 }
 
 BRK_COLLISION(TITUS_level *level) { //Collision detection between player and tiles/objects/elevators
@@ -756,7 +782,7 @@ static int BLOCK_XXPRG(TITUS_level *level, uint8 horiz, uint8 tileY, uint8 tileX
     }
 }
 
-ARAB_BLOCKX(TITUS_level *level) {
+void ARAB_BLOCKX(TITUS_level *level) {
     TITUS_player *player = &(level->player);
     //Horizontal hit (wall), stop the player
     player->sprite.x -= player->sprite.speedX >> 4;
@@ -897,6 +923,7 @@ static int BLOCK_YYPRG(TITUS_level *level, uint8 floor, uint8 floor_above, uint8
         break;
 
     case 6: //Ladder
+		POLL_CONTROLS
         //Fall if hit
         //Skip if walking/crawling
         if (CHOC_FLAG != 0) {
@@ -921,7 +948,7 @@ static int BLOCK_YYPRG(TITUS_level *level, uint8 floor, uint8 floor_above, uint8
                 ARAB_BLOCK_YU(player); //Stop fall
                 return 0;
             }
-            if (((keystate[KEY_UP] || buttonPressed(KEY_UP)) || (keystate[KEY_JUMP] || buttonPressed(KEY_JUMP))) && (order == 6)) { //action UP + climb ladder
+            if (JUMP_BUTTON && (order == 6)) { //action UP + climb ladder
                 ARAB_BLOCK_YU(player); //Stop fall
                 return 0;
             }
@@ -962,12 +989,12 @@ static int BLOCK_YYPRG(TITUS_level *level, uint8 floor, uint8 floor_above, uint8
     }
 }
 
-ARAB_TOMBE_F() {
+void ARAB_TOMBE_F() {
     //Player free fall (doesn't touch floor)
     YFALL = YFALL | 0x01;
 }
 
-ARAB_BLOCK_YU(TITUS_player *player) {
+void ARAB_BLOCK_YU(TITUS_player *player) {
     //Floor; the player will not fall through
     POCKET_FLAG = true;
     player->GLISSE = 0;
@@ -1036,7 +1063,7 @@ static int CASE_SECU(TITUS_level *level, uint8 tileY, uint8 tileX) {
     }
 }
 
-INC_ENERGY(TITUS_level *level) {
+void INC_ENERGY(TITUS_level *level) {
     TITUS_player *player = &(level->player);
     BAR_FLAG = 50;
     player->hp++;
@@ -1046,7 +1073,7 @@ INC_ENERGY(TITUS_level *level) {
     }
 }
 
-DEC_ENERGY(TITUS_level *level) {
+void DEC_ENERGY(TITUS_level *level) {
 
     TITUS_player *player = &(level->player);
 	BAR_FLAG = 50;
@@ -1071,7 +1098,7 @@ static int ACTION_PRG(TITUS_level *level, uint8 action) {
     uint8 tileX, tileY, fflag;
     TITUS_object *object;
     int16 tmpY, tmpX, i, diffX, speedX, speedY;
-
+	
     switch (action) {
     case 0:
     case 9:
@@ -1145,6 +1172,7 @@ static int ACTION_PRG(TITUS_level *level, uint8 action) {
 
     case 6:
     case 22:
+		POLL_CONTROLS
         //Climb a ladder
         if (X_FLAG != 0) {
             XACCELERATION(player, MAX_X * 16);
@@ -1173,7 +1201,7 @@ static int ACTION_PRG(TITUS_level *level, uint8 action) {
                     player->sprite.x += 16;
                 }
             }
-            if (!(keystate[KEY_UP] || buttonPressed(KEY_UP)) && !(keystate[KEY_JUMP] || buttonPressed(KEY_JUMP))) {
+            if (!(JUMP_BUTTON)) {
                 player->sprite.speedY = 4 * 16;
             } else {
                 player->sprite.speedY = 0 - (4 * 16);
@@ -1390,12 +1418,13 @@ static int ACTION_PRG(TITUS_level *level, uint8 action) {
 
     case 8:
     case 24:
+		POLL_CONTROLS
         //Throw
         NEW_FORM(player, action);
         GET_IMAGE(level);
         DECELERATION(player);
         if (CARRY_FLAG) {
-            if (!(keystate[KEY_UP] || buttonPressed(KEY_UP)) && !(keystate[KEY_JUMP] || buttonPressed(KEY_JUMP))) { //Ordinary throw
+            if (!(JUMP_BUTTON)) { //Ordinary throw
                 speedX = 0x0E * 16;
                 speedY = 0;
                 if (player->sprite.flipped) {
@@ -1512,24 +1541,6 @@ static int ACTION_PRG(TITUS_level *level, uint8 action) {
 
 }
 
-DECELERATION(TITUS_player *player) {
-    //Stop acceleration
-    uint8 friction = (3 * 4) >> player->GLISSE;
-    int16 speed;
-    if (player->sprite.speedX < 0) {
-        speed = player->sprite.speedX + friction;
-        if (speed > 0) {
-            speed = 0;
-        }
-    } else {
-        speed = player->sprite.speedX - friction;
-        if (speed < 0) {
-            speed = 0;
-        }
-    }
-    player->sprite.speedX = speed;
-}
-
 static int NEW_FORM(TITUS_player *player, uint8 action) {
     //if the order is changed, change player animation
     if ((LAST_ORDER != action) || (player->sprite.animation == NULL)) {
@@ -1571,7 +1582,7 @@ int16 add_carry() {
     }
 }
 
-COLLISION_TRP(TITUS_level *level) {
+int COLLISION_TRP(TITUS_level *level) {
     //Player versus elevators
     //Change player's location according to the elevator
     uint8 i;
@@ -1628,9 +1639,12 @@ COLLISION_TRP(TITUS_level *level) {
             return 0;
         }
     }
+    
+    return 0;
 }
 
-COLLISION_OBJET(TITUS_level *level) {
+int COLLISION_OBJET(TITUS_level *level) {
+	POLL_CONTROLS
     //Player versus objects
     //Collision, spring state, speed up carpet/scooter/skateboard, bounce bouncy objects
     TITUS_player *player = &(level->player);
@@ -1685,10 +1699,10 @@ COLLISION_OBJET(TITUS_level *level) {
       (player->sprite.speedY > (16 * 3)) &&
       (off_object->objectdata->bounce)) {
         //Bounce on a ball if no long kneestand (down key)
-        if ((keystate[KEY_DOWN] || buttonPressed(KEY_DOWN))) {
+        if (DOWN_BUTTON) {
             player->sprite.speedY = 0;
         } else {
-            if ((keystate[KEY_UP] || buttonPressed(KEY_UP)) || (keystate[KEY_JUMP] || buttonPressed(KEY_JUMP))) {
+            if (JUMP_BUTTON) {
                 player->sprite.speedY += 16 * 3; //increase speed
             } else {
                 player->sprite.speedY -= 16; //reduce speed
@@ -1719,4 +1733,6 @@ COLLISION_OBJET(TITUS_level *level) {
         SAUT_COUNT = 0;
         YFALL = 2;
     }
+    
+    return 0;
 }

@@ -249,7 +249,7 @@ int readconfig(char *configfile) {
             fprintf(stderr, "Error: You have not specified level file number %d, check config file: %s!\n", i, configfile);
             return(-1);
         }
-        if ((ifp = fopen (levelfiles[i - 1], "r")) != NULL )
+        if ((ifp = fopen (path_work, "r")) != NULL )
             fclose(ifp);
         else {
             fprintf(stderr, "Error: Level file number %d (%s) does not exist, check config file: %s!\n", i, levelfiles[i - 1], configfile);
@@ -257,7 +257,7 @@ int readconfig(char *configfile) {
         }
     }
 
-    if ((ifp = fopen (spritefile, "r")) != NULL )
+    if ((ifp = fopen (path_spr, "r")) != NULL )
         fclose(ifp);
     else {
         fprintf(stderr, "Error: Sprite file does not exist, check config file: %s!\n", configfile);

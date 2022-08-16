@@ -48,7 +48,7 @@
 #endif
 
 int viewimage(char * imagefile, int imageformat, int displayformat, int delay) {
-    SDL_Surface *surface;
+    SDL_Surface *surface = NULL;
     SDL_Palette *palette;
     char *tmpchar;
     SDL_Surface *image;
@@ -143,6 +143,14 @@ int viewimage(char * imagefile, int imageformat, int displayformat, int delay) {
         tick_start = SDL_GetTicks();
         while ((image_alpha < 255) && activedelay) //Fade to visible
         {
+#ifdef DREAMCAST
+			POLL_CONTROLS
+			if ((state->buttons & CONT_START) || (state->buttons & CONT_A))
+			{
+                 activedelay = 0;
+				fadeoutskip = 255 - image_alpha;
+			}
+#endif
             if (SDL_PollEvent(&event)) {
                 if (event.type == SDL_QUIT) {
                     SDL_FreeSurface(image);
@@ -213,6 +221,13 @@ int viewimage(char * imagefile, int imageformat, int displayformat, int delay) {
 
         while (activedelay) //Visible delay
         {
+			
+#ifdef DREAMCAST
+			POLL_CONTROLS
+			if ((state->buttons & CONT_START) || (state->buttons & CONT_A))
+			activedelay = 0;
+#endif
+			
             if (SDL_PollEvent(&event)) {
                 if (event.type == SDL_QUIT) {
                     SDL_FreeSurface(image);

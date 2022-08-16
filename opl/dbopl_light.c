@@ -51,9 +51,6 @@
 //#include "dosbox.h"
 #include "dbopl.h"
 
-
-#define GCC_UNLIKELY(x) x
-
 #define TRUE 1
 #define FALSE 0
 
@@ -1192,14 +1189,14 @@ static void Chip__WriteBD(Chip *self, Bit8u val ) {
 #define REGOP( _FUNC_ )															\
 	index = ( ( reg >> 3) & 0x20 ) | ( reg & 0x1f );								\
 	if ( OpOffsetTable[ index ] ) {													\
-		Operator* regOp = (Operator*)( ((char *)self ) + OpOffsetTable[ index ] );	\
+		Operator* regOp = (Operator*)( ((char *)self ) + OpOffsetTable[ index ]-1 );	\
                 Operator__ ## _FUNC_ (regOp, self, val); \
 	}
 
 #define REGCHAN( _FUNC_ )																\
 	index = ( ( reg >> 4) & 0x10 ) | ( reg & 0xf );										\
 	if ( ChanOffsetTable[ index ] ) {													\
-		Channel* regChan = (Channel*)( ((char *)self ) + ChanOffsetTable[ index ] );	\
+		Channel* regChan = (Channel*)( ((char *)self ) + ChanOffsetTable[ index ]-1 );	\
                 Channel__ ## _FUNC_ (regChan, self, val); \
 	}
 
@@ -1548,10 +1545,8 @@ void DBOPL_InitTables( void ) {
 	}
 	//Create a table with offsets of the channels from the start of the chip
 	{ // haleyjd 09/09/10: Driving me #$%^@ insane
-		Chip *chip = NULL;
 		for ( i = 0; i < 32; i++ ) {
 			Bitu index = i & 0xf;
-			Bitu blah; // haleyjd 09/09/10
 			if ( index >= 9 ) {
 				ChanOffsetTable[i] = 0;
 				continue;
@@ -1563,15 +1558,12 @@ void DBOPL_InitTables( void ) {
 			//Add back the bits for highest ones
 			if ( i >= 16 )
 				index += 9;
-			blah = (Bitu) ( &(chip->chan[ index ]) );
-			ChanOffsetTable[i] = blah;
+			ChanOffsetTable[i] = 1+(uint16_t)(index*sizeof(struct _Channel));
 		}
 		//Same for operators
 		for ( i = 0; i < 64; i++ ) {
 			Bitu chNum; // haleyjd 09/09/10
 			Bitu opNum;
-			Bitu blah;
-			Channel* chan = NULL;
 			if ( i % 8 >= 6 || ( (i / 8) % 4 == 3 ) ) {
 				OpOffsetTable[i] = 0;
 				continue;
@@ -1581,15 +1573,14 @@ void DBOPL_InitTables( void ) {
 			if ( chNum >= 12 )
 				chNum += 16 - 12;
 			opNum = ( i % 8 ) / 3;
-			blah = (Bitu) ( &(chan->op[opNum]) );
-			OpOffsetTable[i] = ChanOffsetTable[ chNum ] + blah;
+			OpOffsetTable[i] = ChanOffsetTable[chNum]+(uint16_t)(opNum*sizeof(struct _Operator));
 		}
 #if 0
 		//Stupid checks if table's are correct
 		for ( Bitu i = 0; i < 18; i++ ) {
 			Bit32u find = (Bit16u)( &(chip->chan[ i ]) );
 			for ( Bitu c = 0; c < 32; c++ ) {
-				if ( ChanOffsetTable[c] == find ) {
+				if ( ChanOffsetTable[c] == find+1 ) {
 					find = 0;
 					break;
 				}
@@ -1601,7 +1592,7 @@ void DBOPL_InitTables( void ) {
 		for ( Bitu i = 0; i < 36; i++ ) {
 			Bit32u find = (Bit16u)( &(chip->chan[ i / 2 ].op[i % 2]) );
 			for ( Bitu c = 0; c < 64; c++ ) {
-				if ( OpOffsetTable[c] == find ) {
+				if ( OpOffsetTable[c] == find+1 ) {
 					find = 0;
 					break;
 				}

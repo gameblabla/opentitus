@@ -115,7 +115,7 @@ int loadsprites(TITUS_spritedata ***sprites, char * spritedata, int spritedatasi
             sprintf(lasterror, "Error: Not enough memory to load sprites!\n");
             return (TITUS_ERROR_NOT_ENOUGH_MEMORY);
         }
-        (*sprites)[i]->data = SDL_LoadSprite(spritedata, spritewidth[i], spriteheight[i], offset, pixelformat);
+        (*sprites)[i]->data = SDL_LoadSprite((unsigned char*)spritedata, spritewidth[i], spriteheight[i], offset, pixelformat);
         (*sprites)[i]->collheight = spritecollheight[i];
         (*sprites)[i]->collwidth = spritecollwidth[i];
         (*sprites)[i]->refheight = 0 - ((int16)spriterefheight[i] - spriteheight[i]);
@@ -257,7 +257,7 @@ int copypixelformat(SDL_PixelFormat * destformat, SDL_PixelFormat * srcformat) {
     return 0;
 }
 
-SPRITES_ANIMATION(TITUS_level *level) {
+void SPRITES_ANIMATION(TITUS_level *level) {
     int16 i;
     //Animate player
     if ((LAST_ORDER == 0) &&

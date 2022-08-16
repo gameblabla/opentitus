@@ -4,6 +4,19 @@
 #include "level.h"
 #include "dingoo.h"
 
+#ifdef DREAMCAST
+#include <kos.h>
+#include <dc/sd.h>
+#include <kos/blockdev.h>
+#include <fat/fs_fat.h>
+#include <ext2/fs_ext2.h>
+maple_device_t *cont;
+cont_state_t *state;
+uint8 partition_type;
+kos_blockdev_t sd_dev;
+int is_sdcard = 0;
+#endif
+
 uint8 RESETLEVEL_FLAG;
 bool GAMEOVER_FLAG; //triggers a game over
 uint8 BAR_FLAG; //timer for health bar
@@ -100,14 +113,7 @@ int godtick;
 
 /* original.h */
 
-#define SPRITECOUNT 356
-#define ANIM_PLAYER_MAX 15
-#define ANIM_PLAYER_COUNT 30
-#define ORIG_ANIM_MAX 20
-#define ORIG_OBJECT_COUNT 71
-#define ORIG_NMI_COUNT 230
-#define ORIG_LEVEL_COUNT 20
-#define NMI_ANIM_TABLE_COUNT 1758
+#include "original.h"
 
 SDL_Color orig_palette_colour[16];
 SDL_Color orig_palette_level_colour[16];

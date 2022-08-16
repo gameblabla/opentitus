@@ -1,4 +1,5 @@
 //
+// Copyright(C) 2002, 2003 Marcel Telka
 // Copyright(C) 2005-2014 Simon Howard
 //
 // This program is free software; you can redistribute it and/or
@@ -12,22 +13,16 @@
 // GNU General Public License for more details.
 //
 // DESCRIPTION:
-//     OPL timer thread.
+//     Interface to the ioperm.sys driver, based on code from the
+//     Cygwin ioperm library.
 //
 
-#ifndef OPL_TIMER_H
-#define OPL_TIMER_H
+#ifndef IOPERM_SYS_H
+#define IOPERM_SYS_H
 
-#include "opl.h"
+int IOperm_EnablePortRange(unsigned int from, unsigned int num, int turn_on);
+int IOperm_InstallDriver(void);
+int IOperm_UninstallDriver(void);
 
-int OPL_Timer_StartThread(void);
-void OPL_Timer_StopThread(void);
-void OPL_Timer_SetCallback(uint64_t us, opl_callback_t callback, void *data);
-void OPL_Timer_ClearCallbacks(void);
-void OPL_Timer_Lock(void);
-void OPL_Timer_Unlock(void);
-void OPL_Timer_SetPaused(int paused);
-void OPL_Timer_AdjustCallbacks(float factor);
-
-#endif /* #ifndef OPL_TIMER_H */
+#endif /* #ifndef IOPERM_SYS_H */
 

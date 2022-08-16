@@ -107,14 +107,14 @@ static void drawChar(uint16_t* restrict buffer, int32_t *x, int32_t *y, int32_t 
 	}
 }
 
-static void drawString(uint16_t* restrict buffer, int32_t *x, int32_t *y, int32_t _x, const char *str, uint16_t fc, uint16_t olc)
+static void drawString(uint16_t* buffer, int32_t *x, int32_t *y, int32_t _x, const char *str, uint16_t fc, uint16_t olc)
 {
 	unsigned long i, max = strlen(str) + 1;
 	for(i = 0; i < max; i++)
 		drawChar(buffer, x, y, _x, str[i], fc, olc);
 }
 
-void print_string(const char *s,const uint16_t fg_color, const uint16_t bg_color, int32_t x, int32_t y, uint16_t* restrict buffer) 
+void print_string(const char *s,const uint16_t fg_color, const uint16_t bg_color, int32_t x, int32_t y, uint16_t* buffer) 
 {
 	drawString(buffer, &x, &y, 0, s, fg_color, bg_color);
 }

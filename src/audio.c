@@ -50,14 +50,11 @@
 #include "tituserror.h"
 #include "opl.h"
 #include "common.h"
-
+#include "opl_config.h"
 
 #define ADLIB_DATA_COUNT 10
-#define ADLIB_INSTRUMENT_COUNT 19
+#define ADLIB_INSTRUMENT_COUNT 20
 #define ADLIB_SFX_COUNT 14
-
-#define FREQ_RATE 44100
-#define BUF_SIZE 2048
 
 #define ADLIB_PORT 0x388
 
@@ -116,14 +113,11 @@ typedef struct {
     int data_size;
 
     ADLIB_INSTR instrument_data[ADLIB_INSTRUMENT_COUNT];
-
-    SDL_AudioSpec spec;
 } ADLIB_DATA;
 
 typedef struct {
     unsigned char sampsize;
     int playing;
-    SDL_AudioSpec spec;
     ADLIB_DATA aad;
 } SDL_PLAYER;
 
@@ -379,7 +373,6 @@ int load_file(char *filename, unsigned char **raw_data)
     
 #ifdef HOME_SUPPORT
     sprintf(path_work, "%s/.opentitus/%s", getenv("HOME"), filename);
-    ifp = fopen(path_work, "rb");
 #else
 	#if defined(_TINSPIRE)
 		sprintf(path_work, "./%s.tns", filename);
@@ -497,10 +490,10 @@ int SELECT_MUSIC(int song_number)
 
     tmp2 = ((unsigned int)raw_data[j] & 0xFF) + (((unsigned int)raw_data[j + 1] << 8) & 0xFF00);
 
-    for (i = 0; i < ADLIB_INSTRUMENT_COUNT + 1; i++)
+	for (i = 0; i < ADLIB_INSTRUMENT_COUNT; i++)
         aad->instrument_data[i].vox = 0xFF; //Init; instrument not in use
 
-    for (i = 0; (i < ADLIB_INSTRUMENT_COUNT + 1) && ((j + 2) < aad->data_size); i++) {
+    for (i = 0; (i < ADLIB_INSTRUMENT_COUNT) && ((j + 2) < aad->data_size); i++) {
         tmp1 = tmp2;
         tmp2 = ((unsigned int)raw_data[j + 2] & 0xFF) + (((unsigned int)raw_data[j + 3] << 8) & 0xFF00);
         j += 2;
@@ -567,7 +560,7 @@ int SELECT_MUSIC(int song_number)
     }
 	SDL_UnlockAudio();
     SDL_PauseAudio(0); //perhaps unneccessary
-
+	return 0;
 }
 
 void all_vox_zero()
@@ -624,7 +617,7 @@ void TimerCallback(void *data)
 
     // Schedule the next timer callback.
 
-    OPL_SetCallback(delay, TimerCallback, sdlp);
+    OPL_SetCallback(13750, TimerCallback, sdlp);
 
 }
 
@@ -660,10 +653,28 @@ int initaudio(){
     lastaudiotick = SDL_GetTicks();
 	audiodelay = 14;
     last_song = 0;
-    int in_len;
     FILE *ifp;
 
-	ifp = fopen(audiofile, "rb");
+    char path_work[256];
+    
+#ifdef HOME_SUPPORT
+    sprintf(path_work, "%s/.opentitus/%s", getenv("HOME"), audiofile);
+#else
+	#if defined(_TINSPIRE)
+		sprintf(path_work, "./%s.tns", audiofile);
+	#elif defined(DREAMCAST)
+		sprintf(path_work, "/sd/%s", audiofile);
+		ifp = fopen(path_work, "rb");
+		if (ifp == NULL) {
+			sprintf(path_work, "/cd/%s", audiofile);
+		}
+		else { fclose(ifp); }
+	#else
+		sprintf(path_work, "%s", audiofile);
+    #endif
+#endif
+
+	ifp = fopen(path_work, "rb");
 	if (ifp == NULL) {
 		sprintf(lasterror, "Error: %s not found!\n", audiofile);
 		return (TITUS_ERROR_FILE_NOT_FOUND);
@@ -704,9 +715,7 @@ int initaudio(){
     }
 */
 
-    memset(&(sdl_player_data.spec), 0x00, sizeof(SDL_AudioSpec));
-
-    OPL_SetSampleRate(FREQ_RATE);
+    OPL_SetSampleRate(SOUND_FREQUENCY);
 
     if (!OPL_Init(ADLIB_PORT))
     {
@@ -778,6 +787,7 @@ int WAIT_SONG(){
     }
     do {
         titus_sleep();
+#ifndef DREAMCAST
         keystate = SDL_GetKeyState(NULL);
         while(SDL_PollEvent(&event)) { //Check all events
             if (event.type == SDL_QUIT) {
@@ -807,10 +817,12 @@ int WAIT_SONG(){
                 }
             }
         }
+#endif
         if (sdl_player_data.aad.cutsong == 0) {
             waiting = false;
         }
     } while (waiting);
+	return 0;
 }
 
 int FX_START(int fx_number){
@@ -850,6 +862,7 @@ int FX_STOP() {
     updatechip(0xC6, 0x08); //Channel 6 (Feedback/Algorithm)
 	SDL_UnlockAudio();
 	FX_ON = false;
+	return 0;
 }
 
 int RETURN_MUSIC(){
@@ -858,6 +871,7 @@ int RETURN_MUSIC(){
             SELECT_MUSIC(last_song);
         }
     }
+	return 0;
 }
 
 #endif //AUDIO_ENABLED

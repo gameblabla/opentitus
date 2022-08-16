@@ -34,7 +34,18 @@
 
 int move_player(TITUS_level *level);
 TITUS_object *FORCE_POSE(TITUS_level *level);
+void INC_ENERGY(TITUS_level *level);
+void DEC_ENERGY(TITUS_level *level);
 
+int COLLISION_TRP(TITUS_level *level);
+int COLLISION_OBJET(TITUS_level *level);
+
+void CASE_DEAD_IM (TITUS_level *level);
+void DEC_LIFE (TITUS_level *level);
+int t_pause (TITUS_level *level);
+
+void ARAB_TOMBE_F();
+void ARAB_BLOCK_YU(TITUS_player *player);
 
 #endif
 

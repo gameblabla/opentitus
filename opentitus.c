@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "SDL/SDL.h"
+#include <SDL/SDL.h>
 //#include "opentitus.h"
 
 //Probably not the best way, but it works...
@@ -67,7 +67,14 @@
 #include "objects.h"
 #include "globals.h"
 
+int init();
+
 int main(int argc, char *argv[]) {
+
+    
+#ifdef _TINSPIRE
+	enable_relative_paths(argv);
+#endif
 
     int retval;
     int state = 1; //View the menu when the main loop starts
@@ -78,7 +85,8 @@ int main(int argc, char *argv[]) {
 		nogame_data();
         state = 0;
         goto exitgame;
-    }   
+    } 
+    
 #ifdef HOME_PATH
 	char home_path[256];
 	snprintf(home_path, sizeof(home_path), "%s/.opentitus", getenv("HOME"));
@@ -140,6 +148,15 @@ exitgame:
 
     checkerror();
 
+#ifdef DREAMCAST
+	if (is_sdcard == 1)
+	{
+		fs_fat_unmount("/sd");
+		fs_fat_shutdown();
+		sd_shutdown();
+	}
+#endif
+    
     if (retval == -1)
         retval = 0;
 
@@ -149,11 +166,50 @@ exitgame:
 int init() {
 
     int retval;
+	char path_folder[256];
 
-    retval = readconfig(OPENTITUS_CONFIG_FILE);
+#ifdef HOME_SUPPORT 
+	FILE* fp;
+	sprintf(path_folder, "%s/.opentitus/%s", getenv("HOME"), OPENTITUS_CONFIG_FILE);
+	fp = fopen(path_folder, "rb");
+	if (!fp)
+	{
+		sprintf(path_folder, "./%s", OPENTITUS_CONFIG_FILE);
+	}
+	else { fclose(fp); }
+#else
+	#ifdef _TINSPIRE
+		sprintf(path_folder, "/documents/opentitus/%s.tns", OPENTITUS_CONFIG_FILE);
+	#elif defined(DREAMCAST)
+		/*if(sd_init()) 
+		{
+			printf("No SD card detected. Make sure to have SD card !\n");
+		}
+		else
+		{
+			is_sdcard = 1;
+			sd_blockdev_for_partition(0, &sd_dev, &partition_type);
+			fs_fat_init();
+			fs_fat_mount("/sd", &sd_dev, FS_FAT_MOUNT_READONLY);
+		}*/
+		SDL_DC_SetVideoDriver(SDL_DC_DMA_VIDEO);
+		
+		sprintf(path_folder, "/cd/%s", OPENTITUS_CONFIG_FILE);
+	#else
+		sprintf(path_folder, "./%s", OPENTITUS_CONFIG_FILE);
+	#endif
+#endif
+
+    retval = readconfig(path_folder);
     if (retval < 0)
+    {
+		// Make sure to init at least something
+		SDL_Init(SDL_INIT_VIDEO);
+		screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 320 + 32, 200, 16, 0, 0, 0, 0);
+		rl_screen = SDL_SetVideoMode(320, 200, 0, SDL_SWSURFACE | SDL_DOUBLEBUF);
         return retval;
-
+	}
+	
 #ifdef AUDIO_ENABLED
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0) {
         printf("Unable to initialize SDL: %s\n", SDL_GetError());
@@ -197,7 +253,7 @@ int init() {
 */
 
 	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, reswidth + 32, resheight, bitdepth, 0, 0, 0, 0);
-	rl_screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, SDL_SWSURFACE | SDL_DOUBLEBUF);
+	rl_screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, SDL_HWSURFACE | SDL_DOUBLEBUF);
 	 
     if (screen == NULL) {
         printf("Unable to set video mode: %s\n", SDL_GetError());

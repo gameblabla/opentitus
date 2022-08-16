@@ -38,8 +38,8 @@
 #include "level.h"
 
 
-int MOVE_NMI(TITUS_level *level);
-int SET_NMI(TITUS_level *level);
+void MOVE_NMI(TITUS_level *level);
+void SET_NMI(TITUS_level *level);
 int MOVE_TRASH(TITUS_level *level);
 
 #endif

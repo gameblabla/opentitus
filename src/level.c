@@ -59,11 +59,14 @@ int loadlevel(TITUS_level *level, unsigned char *leveldata, int leveldatasize, T
     level->objectcount = 0;
     level->enemycount = 0;
     level->elevatorcount = 0;
-/*
+    /*
     level->player.sprite.buffer = NULL;
     level->player.sprite2.buffer = NULL;
-    level->player.sprite3.buffer = NULL;
-*/
+    level->player.sprite3.buffer = NULL;*/
+    level->player.sprite.speedX = 0;
+    level->player.sprite2.speedX = 0;
+    level->player.sprite3.speedX = 0;
+    
     pre_size = (leveldatasize - 35828) >> 8; //level->height
     level->width = 256;
 
@@ -135,6 +138,8 @@ int loadlevel(TITUS_level *level, unsigned char *leveldata, int leveldatasize, T
         sprintf(lasterror, "Error: Not enough memory to initialize level!\n");
         return (TITUS_ERROR_NOT_ENOUGH_MEMORY);
     }
+    memset(level->object, 0, sizeof(TITUS_object) * pre_size);
+    
     level->objectcount = pre_size;
     offset = level->height * level->width + 33536;
     for (i = 0; i < level->objectcount; i++) {
@@ -154,6 +159,8 @@ int loadlevel(TITUS_level *level, unsigned char *leveldata, int leveldatasize, T
         sprintf(lasterror, "Error: Not enough memory to initialize level!\n");
         return (TITUS_ERROR_NOT_ENOUGH_MEMORY);
     }
+    memset(level->enemy, 0, sizeof(TITUS_enemy) * pre_size);
+    
     level->enemycount = pre_size;
     offset = level->height * level->width + 33782;
     for (i = 0; i < level->enemycount; i++) {
@@ -253,6 +260,7 @@ int loadlevel(TITUS_level *level, unsigned char *leveldata, int leveldatasize, T
         sprintf(lasterror, "Error: Not enough memory to initialize level!\n");
         return (TITUS_ERROR_NOT_ENOUGH_MEMORY);
     }
+    memset(level->bonus, 0, sizeof(TITUS_bonus) * level->bonuscount);
 
     offset = level->height * level->width + 35082;
     for (i = 0; i < level->bonuscount; i++) {
@@ -274,6 +282,7 @@ int loadlevel(TITUS_level *level, unsigned char *leveldata, int leveldatasize, T
         sprintf(lasterror, "Error: Not enough memory to initialize level!\n");
         return (TITUS_ERROR_NOT_ENOUGH_MEMORY);
     }
+    memset(level->gate, 0, sizeof(TITUS_gate) * level->gatecount);
 
     offset = level->height * level->width + 35484;
     for (i = 0; i < level->gatecount; i++) {
@@ -297,6 +306,8 @@ int loadlevel(TITUS_level *level, unsigned char *leveldata, int leveldatasize, T
         sprintf(lasterror, "Error: Not enough memory to initialize level!\n");
         return (TITUS_ERROR_NOT_ENOUGH_MEMORY);
     }
+    memset(level->elevator, 0, sizeof(TITUS_elevator) * pre_size);
+    
     level->elevatorcount = pre_size;
     offset = level->height * level->width + 35624;
     for (i = 0; i < level->elevatorcount; i++) {
@@ -348,7 +359,12 @@ int loadlevel(TITUS_level *level, unsigned char *leveldata, int leveldatasize, T
         level->trash[i].buffer = NULL;
     }
 */
-	
+	level->player.sprite.speedX = 0;
+	level->player.sprite.speedY = 0;
+	level->player.sprite2.speedX = 0;
+	level->player.sprite2.speedY = 0;
+	level->player.sprite3.speedX = 0;
+	level->player.sprite3.speedY = 0;
 	
     return (0);
 }

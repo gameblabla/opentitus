@@ -29,10 +29,48 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include "SDL/SDL.h"
+#ifdef DREAMCAST
+#include <kos.h>
+#include <dc/sd.h>
+#include <kos/blockdev.h>
+#include <fat/fs_fat.h>
+#include <ext2/fs_ext2.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_dreamcast.h>
+#endif
+#include <SDL/SDL.h>
 #include "definitions.h"
 #include "level.h"
 #include "dingoo.h"
+
+// Global controls
+
+#ifdef DREAMCAST
+extern maple_device_t *cont;
+extern cont_state_t *state;
+extern uint8 partition_type;
+extern kos_blockdev_t sd_dev;
+extern int is_sdcard;
+#define JUMP_BUTTON (state->buttons & CONT_DPAD_UP || state->buttons & CONT_A)
+#define UP_BUTTON (state->buttons & CONT_DPAD_UP)
+#define DOWN_BUTTON (state->buttons & CONT_DPAD_DOWN)
+#define SPACE_BUTTON (state->buttons & CONT_A)
+#define LEFT_BUTTON (state->buttons & CONT_DPAD_LEFT)
+#define RIGHT_BUTTON (state->buttons & CONT_DPAD_RIGHT)
+
+#define THROW_BUTTON (state->buttons & CONT_B)
+
+#define POLL_CONTROLS cont = maple_enum_type(0, MAPLE_FUNC_CONTROLLER); state = (cont_state_t *) maple_dev_status(cont); 
+#else
+#define JUMP_BUTTON (keystate[KEY_UP] || buttonPressed(KEY_UP)) || (keystate[KEY_JUMP] || buttonPressed(KEY_JUMP))
+#define UP_BUTTON (keystate[KEY_UP] || buttonPressed(KEY_UP))
+#define DOWN_BUTTON (keystate[KEY_DOWN] || buttonPressed(KEY_DOWN))
+#define SPACE_BUTTON (keystate[KEY_SPACE] || buttonPressed(KEY_SPACE))
+#define LEFT_BUTTON (keystate[KEY_LEFT] || buttonPressed(KEY_LEFT))
+#define RIGHT_BUTTON (keystate[KEY_RIGHT] || buttonPressed(KEY_RIGHT))
+#define THROW_BUTTON (keystate[KEY_SPACE])
+#define POLL_CONTROLS 
+#endif
 
 //To simplify porting:
 #ifdef _DINGUX
@@ -267,6 +305,21 @@ extern int godtick;
 extern void Flip_Titus();
 
 extern SDL_Surface* rl_screen;
+
+#include "enemies.h"
+#include "fonts.h"
+#include "backbuffer.h"
+#include "sprites.h"
+#include "objects.h"
+#include "audio.h"
+#include "player.h"
+#include "level.h"
+#include "engine.h"
+#include "definitions.h"
+#include "keyboard.h"
+#include "draw.h"
+#include "gates.h"
+#include "scroll.h"
 
 #endif
 

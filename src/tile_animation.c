@@ -33,7 +33,7 @@
 #include "globals.h"
 #include "definitions.h"
 
-BLOC_ANIMATION(TITUS_level *level) {
+void BLOC_ANIMATION(TITUS_level *level) {
     //Draw animated sprites on OFS_SCREENM
     uint8 tmp_ym, curY, tmp_xm, curX;
     uint8 i, j;

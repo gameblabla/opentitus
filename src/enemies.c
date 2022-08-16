@@ -44,10 +44,26 @@
 
 int updateenemysprite(TITUS_level *level, TITUS_enemy *enemy, int16 number, bool clearflags);
 bool NMI_VS_DROP(TITUS_sprite *enemysprite, TITUS_sprite *sprite);
-int KICK_ASH(TITUS_level *level, TITUS_sprite *enemysprite, int16 power);
+void KICK_ASH(TITUS_level *level, TITUS_sprite *enemysprite, int16 power);
 bool FIND_TRASH(TITUS_level *level, TITUS_sprite **trash);
 
-int MOVE_NMI(TITUS_level *level) {
+void MOVE_NMI(TITUS_level *level);
+void DEAD1(TITUS_level *level, TITUS_enemy *enemy);
+int updateenemysprite(TITUS_level *level, TITUS_enemy *enemy, int16 number, bool clearflags);
+void SET_NMI(TITUS_level *level);
+
+int GAL_FORM(TITUS_level *level, TITUS_enemy *enemy);
+void ACTIONC_NMI(TITUS_level *level, TITUS_enemy *enemy);
+void KICK_ASH(TITUS_level *level, TITUS_sprite *enemysprite, int16 power);
+bool NMI_VS_DROP(TITUS_sprite *enemysprite, TITUS_sprite *sprite);
+void SEE_CHOC(TITUS_level *level);
+int MOVE_TRASH(TITUS_level *level);
+bool FIND_TRASH(TITUS_level *level, TITUS_sprite **trash);
+void PUT_BULLET(TITUS_level *level, TITUS_enemy *enemy, TITUS_sprite *bullet);
+void UP_ANIMATION(TITUS_sprite *sprite);
+void DOWN_ANIMATION(TITUS_sprite *sprite);
+
+void MOVE_NMI(TITUS_level *level) {
     TITUS_sprite *bullet;
     int i, j;
     uint8 hflag;
@@ -1006,7 +1022,7 @@ int MOVE_NMI(TITUS_level *level) {
     } //for (i = 0; i < NMI_BY_LEVEL; i++)
 }
 
-DEAD1(TITUS_level *level, TITUS_enemy *enemy) {
+void DEAD1(TITUS_level *level, TITUS_enemy *enemy) {
     if (((enemy->dying & 0x01) != 0) || //00000001 or 00000011
       (enemy->dead_sprite == -1)) {
         if ((enemy->dying & 0x01) == 0) {
@@ -1085,7 +1101,7 @@ int updateenemysprite(TITUS_level *level, TITUS_enemy *enemy, int16 number, bool
 }
 
 
-int SET_NMI(TITUS_level *level) {
+void SET_NMI(TITUS_level *level) {
     //Clear enemy sprites
     //If an enemy is on the screen
     // - Set bit 13
@@ -1182,7 +1198,7 @@ int SET_NMI(TITUS_level *level) {
 }
 
 
-GAL_FORM(TITUS_level *level, TITUS_enemy *enemy) { //Enemy animation
+int GAL_FORM(TITUS_level *level, TITUS_enemy *enemy) { //Enemy animation
     int16 *image;
     enemy->sprite.invisible = false;
     if ((enemy->dying & 0x03) != 0) {
@@ -1208,10 +1224,12 @@ GAL_FORM(TITUS_level *level, TITUS_enemy *enemy) { //Enemy animation
     }
     enemy->sprite.animation = image;
     enemy->visible = true;
+    
+    return 0;
 }
 
 
-ACTIONC_NMI(TITUS_level *level, TITUS_enemy *enemy) {
+void ACTIONC_NMI(TITUS_level *level, TITUS_enemy *enemy) {
     switch (enemy->type) {
     case 0:
     case 1:
@@ -1248,7 +1266,7 @@ ACTIONC_NMI(TITUS_level *level, TITUS_enemy *enemy) {
 }
 
 
-int KICK_ASH(TITUS_level *level, TITUS_sprite *enemysprite, int16 power) {
+void KICK_ASH(TITUS_level *level, TITUS_sprite *enemysprite, int16 power) {
 #ifdef AUDIO_ENABLED
     FX_START(4);
 #endif
@@ -1299,7 +1317,7 @@ bool NMI_VS_DROP(TITUS_sprite *enemysprite, TITUS_sprite *sprite) {
 }
 
 
-SEE_CHOC(TITUS_level *level) {
+void SEE_CHOC(TITUS_level *level) {
     updatesprite(level, &(level->player.sprite2), FIRST_OBJET + 15, true); //Hit (a throw hits an enemy)
     level->player.sprite2.speedX = 0;
     level->player.sprite2.speedY = 0;
@@ -1346,7 +1364,7 @@ bool FIND_TRASH(TITUS_level *level, TITUS_sprite **trash) {
     return false;
 }
 
-PUT_BULLET(TITUS_level *level, TITUS_enemy *enemy, TITUS_sprite *bullet) {
+void PUT_BULLET(TITUS_level *level, TITUS_enemy *enemy, TITUS_sprite *bullet) {
     bullet->x = enemy->sprite.x;
     bullet->y = enemy->sprite.y - (int8)(*(enemy->sprite.animation - 1) & 0x00FF);
     updatesprite(level, bullet, (*(enemy->sprite.animation - 2) & 0x1FFF) + FIRST_OBJET, true);
@@ -1361,14 +1379,14 @@ PUT_BULLET(TITUS_level *level, TITUS_enemy *enemy, TITUS_sprite *bullet) {
     bullet->x += bullet->speedX >> 4;
 }
 
-UP_ANIMATION(TITUS_sprite *sprite) {
+void UP_ANIMATION(TITUS_sprite *sprite) {
     do {
         sprite->animation++;
     } while (*sprite->animation >= 0);
     sprite->animation++;
 }
 
-DOWN_ANIMATION(TITUS_sprite *sprite) {
+void DOWN_ANIMATION(TITUS_sprite *sprite) {
     do {
         sprite->animation--;
     } while (*sprite->animation >= 0);

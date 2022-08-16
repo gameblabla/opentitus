@@ -16,6 +16,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <inttypes.h>
 
 //Use 8 handlers based on a small logatirmic wavetabe and an exponential table for volume
@@ -32,14 +34,19 @@ typedef struct _Chip Chip;
 typedef struct _Operator Operator;
 typedef struct _Channel Channel;
 
-typedef uintptr_t       Bitu;
-typedef intptr_t        Bits;
-typedef uint32_t        Bit32u;
-typedef int32_t         Bit32s;
-typedef uint16_t        Bit16u;
-typedef int16_t         Bit16s;
-typedef uint8_t         Bit8u;
-typedef int8_t          Bit8s;
+typedef uint32_t	Bitu;
+typedef int32_t	Bits;
+
+typedef uint32_t	Bit32u;
+typedef int32_t		Bit32s;
+typedef uint16_t	Bit16u;
+typedef int16_t		Bit16s;
+typedef uint8_t		Bit8u;
+typedef int8_t		Bit8s;
+
+#define GCC_UNLIKELY(x) (x)
+#define GCC_LIKELY(x) (x)
+#define INLINE inline
 
 #if (DBOPL_WAVE == WAVE_HANDLER)
 typedef Bits ( DB_FASTCALL *WaveHandler) ( Bitu i, Bitu volume );
@@ -146,6 +153,9 @@ struct _Channel {
 };
 
 struct _Chip {
+	//18 channels with 2 operators each
+	Channel chan[18];
+	
 	//This is used as the base counter for vibrato and tremolo
 	Bit32u lfoCounter;
 	Bit32u lfoAdd;
@@ -161,9 +171,6 @@ struct _Chip {
 	Bit32u linearRates[76];
 	//Best match attack rates for the rate of this chip
 	Bit32u attackRates[76];
-
-	//18 channels with 2 operators each
-	Channel chan[18];
 
 	Bit8u reg104;
 	Bit8u reg08;

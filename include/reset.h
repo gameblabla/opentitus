@@ -32,6 +32,7 @@
 #include "SDL/SDL.h"
 #include "level.h"
 
+uint8 RESET_LEVEL(TITUS_level *level);
 int INIT_SCREENM(TITUS_level *level);
 int CLEAR_DATA(TITUS_level *level);
 

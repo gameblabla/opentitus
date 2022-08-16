@@ -34,7 +34,9 @@
 typedef unsigned char uint8;
 typedef unsigned short int uint16;
 typedef unsigned long int uint32;
+#ifndef DREAMCAST
 typedef signed char int8;
+#endif
 typedef signed short int int16;
 typedef signed long int int32;
 

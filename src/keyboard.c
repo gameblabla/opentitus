@@ -43,10 +43,79 @@
 #endif
 
 int waitforbutton() {
+#ifdef DREAMCAST
+	struct button_dc
+	{
+		unsigned char time;
+		unsigned char state;
+	} buttons[3];
+	unsigned char j = 0;
+	long button_to_press = 0;
+	
+	for (j=0;j<3;j++)
+	{	
+		buttons[j].state = 2;
+		buttons[j].time = -5;
+	}
+#endif
     SDL_Event event;
     int waiting = 1;
     while (waiting > 0)
     {
+
+#ifdef DREAMCAST
+		POLL_CONTROLS
+		for (j=0;j<3;j++)
+		{	
+			if (j==0) button_to_press = CONT_A;
+			else button_to_press = CONT_START;
+
+			switch (buttons[j].state)
+			{
+				case 0:
+					if (state->buttons & button_to_press)
+					{
+						buttons[j].state = 1;
+						buttons[j].time = 0;
+					}
+				break;
+				
+				case 1:
+					buttons[j].time++;
+					
+					if (buttons[j].time > 0)
+					{
+						buttons[j].state = 2;
+						buttons[j].time = 0;
+					}
+				break;
+				
+				case 2:
+					if (!(state->buttons & button_to_press))
+					{
+						buttons[j].state = 3;
+						buttons[j].time = 0;
+					}
+				break;
+				
+				case 3:
+					buttons[j].time++;
+					
+					if (buttons[j].time > 0)
+					{
+						buttons[j].state = 0;
+						buttons[j].time = 0;
+					}
+				break;
+			}   
+
+		}
+		if (buttons[0].state == 1 || buttons[1].state == 1)
+		{
+			waiting = 0;
+		}
+#endif
+		
         if (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT)
                 waiting = -1;

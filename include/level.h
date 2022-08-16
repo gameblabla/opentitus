@@ -239,4 +239,7 @@ uint8 get_horizflag(TITUS_level *level, int16 tileY, int16 tileX);
 uint8 get_floorflag(TITUS_level *level, int16 tileY, int16 tileX);
 uint8 get_ceilflag(TITUS_level *level, int16 tileY, int16 tileX);
 
+unsigned int loaduint16(unsigned char c1, unsigned char c2);
+int loadint16(unsigned char c1, unsigned char c2);
+
 #endif

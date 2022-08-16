@@ -38,7 +38,6 @@
 #include "audio.h"
 #include "globals.h"
 #include "common.h"
-#include "SDL/SDL_image.h"
 
 //Probably not the best way, but it works...
 #define HAVE_CONFIG_H 1
@@ -59,7 +58,7 @@ int viewmenu(char * menufile, int menuformat) {
     SDL_Surface *surface;
     SDL_Palette *palette;
     char *tmpchar;
-    SDL_Surface *image;
+    SDL_Surface *image = NULL;
     unsigned char *menudata;
     int retval;
     int i, j, w2, h2;
@@ -75,6 +74,22 @@ int viewmenu(char * menufile, int menuformat) {
     SDL_Rect src, dest;
     SDL_Rect sel[2];
     SDL_Rect sel_dest[2];
+    
+#ifdef DREAMCAST
+	struct button_dc
+	{
+		unsigned char time;
+		unsigned char state;
+	} buttons[3];
+	unsigned char z = 0;
+	long button_to_press = 0;
+	
+	for (z=0;z<3;z++)
+	{	
+		buttons[z].state = 2;
+		buttons[z].time = -5;
+	}
+#endif
     
     retval = unSQZ(menufile, &menudata);
 
@@ -222,6 +237,7 @@ int viewmenu(char * menufile, int menuformat) {
     beforemenuloop:
 
     while (menuloop) { //View the menu
+		POLL_CONTROLS
 
         if (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
@@ -274,6 +290,71 @@ int viewmenu(char * menufile, int menuformat) {
 #endif
             }
         }
+
+#ifdef DREAMCAST
+		for (z=0;z<3;z++)
+		{	
+			if (z==0) button_to_press = CONT_DPAD_UP;
+			else if (z==1) button_to_press = CONT_DPAD_DOWN;
+			else button_to_press = CONT_A;
+					
+			switch (buttons[z].state)
+			{
+				case 0:
+					if (state->buttons & button_to_press)
+					{
+						buttons[z].state = 1;
+						buttons[z].time = 0;
+					}
+				break;
+				
+				case 1:
+					buttons[z].time++;
+					
+					if (buttons[z].time > 0)
+					{
+						buttons[z].state = 2;
+						buttons[z].time = 0;
+					}
+				break;
+				
+				case 2:
+					if (!(state->buttons & button_to_press))
+					{
+						buttons[z].state = 3;
+						buttons[z].time = 0;
+					}
+				break;
+				
+				case 3:
+					buttons[z].time++;
+					
+					if (buttons[z].time > 0)
+					{
+						buttons[z].state = 0;
+						buttons[z].time = 0;
+					}
+				break;
+			}   
+		}
+
+		if ((buttons[0].state == 1)) 
+		{
+			selection = 0;
+			buttons[0].state = 2;
+		}
+		else if ((buttons[1].state == 1)) 
+		{
+			selection = 1;
+			buttons[1].state = 2;
+		}
+		else if ((buttons[2].state == 1)) 
+		{
+			menuloop = 0;
+			buttons[2].state = 2;
+		}
+#endif
+
 
         SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
         SDL_BlitSurface(image, &src, screen, &dest);
@@ -383,6 +464,21 @@ int viewmenu(char * menufile, int menuformat) {
 }
 
 int enterpassword(){
+#ifdef DREAMCAST
+	struct button_dc
+	{
+		unsigned char time;
+		unsigned char state;
+	} buttons[6];
+	unsigned char j = 0;
+	long button_to_press = 0;
+	
+	for (j=0;j<6;j++)
+	{	
+		buttons[j].state = 2;
+		buttons[j].time = -5;
+	}
+#endif
     int retval;
     char code[] = "____";
     int i;
@@ -394,7 +490,7 @@ int enterpassword(){
 
     SDL_Print_Text("CODE", 111, 80);
 
-#ifdef _DINGUX
+#if defined(_DINGUX) || defined(DREAMCAST) || defined(_TINSPIRE)
     int index = 0;
     int counter = 0;
 #endif
@@ -407,6 +503,89 @@ int enterpassword(){
     Flip_Titus();
 #else
     for (i = 0; i < 4; ) {
+		
+
+#ifdef DREAMCAST
+		POLL_CONTROLS
+		for (j=0;j<5;j++)
+		{	
+			if (j==0) button_to_press = CONT_DPAD_UP;
+			else if (j==1) button_to_press = CONT_DPAD_DOWN;
+			else if (j==2) button_to_press = CONT_DPAD_LEFT;
+			else if (j==3) button_to_press = CONT_DPAD_RIGHT;
+			else button_to_press = CONT_A;
+					
+			switch (buttons[j].state)
+			{
+				case 0:
+					if (state->buttons & button_to_press)
+					{
+						buttons[j].state = 1;
+						buttons[j].time = 0;
+					}
+				break;
+				
+				case 1:
+					buttons[j].time++;
+					
+					if (buttons[j].time > 0)
+					{
+						buttons[j].state = 2;
+						buttons[j].time = 0;
+					}
+				break;
+				
+				case 2:
+					if (!(state->buttons & button_to_press))
+					{
+						buttons[j].state = 3;
+						buttons[j].time = 0;
+					}
+				break;
+				
+				case 3:
+					buttons[j].time++;
+					
+					if (buttons[j].time > 0)
+					{
+						buttons[j].state = 0;
+						buttons[j].time = 0;
+					}
+				break;
+			}   
+
+		}
+
+		if ((buttons[0].state == 1) || (buttons[2].state == 1))
+		{
+            index++;
+            if (index > 15)
+                index = 0;
+                
+			buttons[0].state = 2;
+			buttons[2].state = 2;
+		}       
+		else if ((buttons[1].state == 1) || (buttons[3].state == 1))
+		{
+			index--;
+			if (index < 0)
+				index = 15;
+			buttons[1].state = 2;
+			buttons[3].state = 2;
+		}   
+		else if (buttons[4].state == 1)
+		{
+			if (index < 10)
+				code[i] = index + CHAR_0;
+			else
+				code[i] = index - 10 + CHAR_A;
+				
+			i++;
+			index = 0;
+			buttons[4].state = 2;
+		} 
+#endif
+		
         while(SDL_PollEvent(&event)) { //Check all events
             if (event.type == SDL_QUIT) {
                 return (-1);
@@ -416,7 +595,7 @@ int enterpassword(){
                 if (event.key.keysym.sym == SDLK_ESCAPE) {
                     return (-1);
                 }
-#ifdef _DINGUX
+#if defined(_DINGUX) || defined(_TINSPIRE)
                 if (event.key.keysym.sym == KEY_UP) {
                     index++;
                     if (index > 15) {
@@ -466,7 +645,7 @@ int enterpassword(){
 #endif
             }
         }
-#ifdef _DINGUX
+#if defined(_DINGUX) || defined(DREAMCAST) || defined(_TINSPIRE)
         if (i < 4) {
             counter++;
             if (counter > 10) {

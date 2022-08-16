@@ -46,6 +46,7 @@
 #include "common.h"
 #include "tituserror.h"
 #include "original.h"
+#include "draw.h"
 
 SDL_Surface* rl_screen;
 
@@ -55,6 +56,7 @@ int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from 
     SDL_Rect src, dest;
 	int r_t, g_t, b_t;
 	int i, j, r, g, b;
+	int x, y;
     //SDL_Surface *surface = NULL;
 
 	//First of all: make the screen black, at least the lower part of the screen
@@ -157,7 +159,7 @@ int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from 
     dest.w = src.w;
     dest.h = src.h;
 
-    for (int x = -1; x < 21; x++) {
+    for (x = -1; x < 21; x++) {
         int tileX = BITMAP_X + x;
         if(tileX < 0) {
             continue;
@@ -165,13 +167,14 @@ int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from 
         if(tileX >= level->width) {
             continue;
         }
-        for (int y = 0; y < 12; y++) {
+        for (y = 0; y < 12; y++) {
             dest.x = 16 + x * 16;
             dest.y = y * 16;
-            auto tile = level->tilemap[BITMAP_Y + y][tileX];
+            int tile = level->tilemap[BITMAP_Y + y][tileX];
             SDL_BlitSurface(level->tile[level->tile[tile].animation[tile_anim]].tiledata, &src, screen, &dest);
         }
     }
+    return 0;
 }
 
 
@@ -179,7 +182,7 @@ int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from 
 //If the flash bit is set, the first 3 planes will be 0, the last plane will be normal (colour & 0x01, odd colors gets white, even colours gets black)
 
 
-DISPLAY_SPRITES(TITUS_level *level) {
+void DISPLAY_SPRITES(TITUS_level *level) {
     int16 i;
     char buffer[7]; //xxx ms
 
@@ -268,7 +271,7 @@ DISPLAY_SPRITES(TITUS_level *level) {
 
 }
 
-display_sprite(TITUS_level *level, TITUS_sprite *spr) {
+int display_sprite(TITUS_level *level, TITUS_sprite *spr) {
     SDL_Surface *image;
     SDL_Rect src, dest;
     int screen_limit;
@@ -337,7 +340,7 @@ display_sprite(TITUS_level *level, TITUS_sprite *spr) {
 
     spr->visible = true;
     spr->flash = false;
-
+	return 0;
 }
 
 SDL_Surface *sprite_from_cache(TITUS_level *level, TITUS_sprite *spr) {
@@ -496,6 +499,7 @@ int flip_screen(bool slow) {
 #else
     NO_FAST_CPU(slow);
 #endif
+	return 0;
 }
 
 
@@ -578,6 +582,8 @@ int INIT_SCREENM(TITUS_level *level) {
         scroll(level);
     } while (g_scroll_y || g_scroll_x);
     OPEN_SCREEN(level);
+    
+    return 0;
 }
 
 
@@ -586,10 +592,12 @@ int DISPLAY_COUNT(TITUS_level *level) {
     if (BAR_FLAG != 0) {
         DISPLAY_ENERGY(level);
     }
+    
+    return 0;
 }
 
 
-DISPLAY_ENERGY(TITUS_level *level) {
+int DISPLAY_ENERGY(TITUS_level *level) {
     uint8 offset = 96 + 16 - g_scroll_px_offset;
     uint8 i;
     SDL_Rect dest;
@@ -609,6 +617,7 @@ DISPLAY_ENERGY(TITUS_level *level) {
         SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, 255, 255, 255));
         offset += 8;
     }
+    return 0;
 }
 
 int fadeout() {
@@ -691,6 +700,8 @@ int fadeout() {
         titus_sleep();
     }
     SDL_FreeSurface(image);
+    
+    return 0;
 
 }
 
@@ -845,12 +856,11 @@ int freepixelformat(SDL_PixelFormat **pixelformat){
 
 void Flip_Titus()
 {
-    SDL_Rect src;
+    SDL_Rect src, dst;
     src.x = 16 - g_scroll_px_offset;
-    src.y = 0;
-    src.w = 320;
-    src.h = 200;
-    SDL_Rect dst = src;
+    dst.y = src.y = 0;
+    dst.w = src.w = reswidth;
+    dst.h = src.h = resheight;
     dst.x = 0;
 	SDL_BlitSurface(screen, &src, rl_screen, &dst);
 	SDL_Flip(rl_screen);	
