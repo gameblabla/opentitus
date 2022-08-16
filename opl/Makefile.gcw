@@ -1,0 +1,25 @@
+CC = mipsel-linux-gcc
+AR = mipsel-linux-ar
+RANLIB = mipsel-linux-ranlib
+
+CFLAGS = -O2 -I. -I/usr/include/SDL
+LDFLAGS = -lm -lSDLmain -lSDL -lSDL_mixer -s
+OUTPUT = libopl_gcw.a
+
+SOURCES = opl.c opl_linux.c opl_obsd.c opl_queue.c opl_sdl.c opl_timer.c opl_win32.c ioperm_sys.c dbopl_light.c
+OBJS = ${SOURCES:.c=.o}
+
+all: ${OUTPUT} toar tolib
+
+${OUTPUT}:${OBJS}
+	${CC} -c -o  ${OBJS} ${CFLAGS} ${LDFLAGS}
+
+toar:
+	$(AR) cru ${OUTPUT} ${OBJS}
+	
+tolib:
+	$(RANLIB) ${OUTPUT}
+	
+clean:
+	rm *.o
+	rm ${OUTPUT}

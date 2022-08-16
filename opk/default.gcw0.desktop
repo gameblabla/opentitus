@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=OpenTitus
+Comment=Platforming game
+Exec=titus
+Icon=icon
+Terminal=false
+Categories=games;
