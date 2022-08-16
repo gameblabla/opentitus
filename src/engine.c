@@ -187,7 +187,7 @@ int playtitus(int firstlevel){
 #endif
 
             INIT_SCREENM(&level); //Todo: comment, DOCUMENTED! (reset_level_simplified)
-            TFR_SCREENM(); //Draws tiles
+            TFR_SCREENM(&level); //Draws tiles
             flip_screen(true); //Flip backbuffer
 
             
@@ -311,7 +311,7 @@ static int playlevel(TITUS_level *level) {
         gettick(&tick, 8);
         BLOC_ANIMATION(level); //Animate tiles
         gettick(&tick, 9);
-        TFR_SCREENM(); //Draws tiles on the backbuffer
+        TFR_SCREENM(level); //Draws tiles on the backbuffer
         gettick(&tick, 10);
         DISPLAY_SPRITES(level); //Draws sprites on the backbuffer
         gettick(&tick, 11);
@@ -353,7 +353,7 @@ static int playlevel(TITUS_level *level) {
         SPRITES_ANIMATION(level); //Animate player and objects
         scroll(level); //X- and Y-scrolling
         BLOC_ANIMATION(level); //Animate tiles
-        TFR_SCREENM(); //Draws tiles on the backbuffer
+        TFR_SCREENM(level); //Draws tiles on the backbuffer
         DISPLAY_SPRITES(level); //Draws sprites on the backbuffer
         retval = RESET_LEVEL(level); //Check terminate flags (finishlevel, gameover, death or theend)
         if (retval < 0) {
@@ -391,7 +391,7 @@ int death(TITUS_level *level) {
     updatesprite(level, &(player->sprite), 13, true); //Death
     player->sprite.speedY = 15;
     for (i = 0; i < 60; i++) {
-        TFR_SCREENM();
+        TFR_SCREENM(level);
         //TODO! GRAVITY();
         DISPLAY_SPRITES(level);
         flip_screen(true);
@@ -433,7 +433,7 @@ int gameover(TITUS_level *level) {
     player->sprite3.x = (BITMAP_X << 4) + (320+120-2);
     player->sprite3.y = (BITMAP_Y << 4) + 100;
     for (i = 0; i < 31; i++) {
-        TFR_SCREENM();
+        TFR_SCREENM(level);
         DISPLAY_SPRITES(level);
         flip_screen(true);
         player->sprite2.x += 8;

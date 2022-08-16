@@ -168,7 +168,7 @@ int CLOSE_SCREEN() {
 }
 
 
-int OPEN_SCREEN() {
+int OPEN_SCREEN(TITUS_level *level) {
     SDL_Rect dest;
     int16 rwidth = 320; //TODO: make this global
     int16 rheight = 192;
@@ -176,7 +176,7 @@ int OPEN_SCREEN() {
     int16 blockX = 320 / (step_count * 2);  //16 (320: resolution width)
     int16 blockY = 192 / (step_count * 2); //9 (192: resolution height)
     int8 i, j;
-    TFR_SCREENM(); //Draw tiles on the backbuffer
+    TFR_SCREENM(level); //Draw tiles on the backbuffer
     
     //BLACK_SCREEN
     dest.x = 0;

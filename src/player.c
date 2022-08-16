@@ -552,7 +552,7 @@ int t_pause (TITUS_level *level) {
     TITUS_sprite tmp;
     //tmp.buffer = NULL;
 
-    TFR_SCREENM(); //Draw tiles
+    TFR_SCREENM(level); //Draw tiles
     copysprite(level, &(tmp), &(player->sprite));
     updatesprite(level, &(player->sprite), 29, true); //Pause tile
     DISPLAY_SPRITES(level); //Draw sprites

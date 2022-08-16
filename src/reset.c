@@ -110,7 +110,7 @@ uint8 RESET_LEVEL(TITUS_level *level) {
             player->sprite2.x -= 3;
             MOVE_HIM(level, &(player->sprite2));
             //View all
-            TFR_SCREENM();
+            TFR_SCREENM(level);
             DISPLAY_SPRITES(level);
             flip_screen(true);
         } while (player->sprite2.x > player->sprite.x + 28);
@@ -126,7 +126,7 @@ uint8 RESET_LEVEL(TITUS_level *level) {
             MOVE_HIM(level, &(player->sprite));
             scroll(level);
             BLOC_ANIMATION(level);
-            TFR_SCREENM();
+            TFR_SCREENM(level);
             DISPLAY_SPRITES(level);
             flip_screen(true);
             player->sprite.y++;
@@ -151,7 +151,7 @@ uint8 RESET_LEVEL(TITUS_level *level) {
 
             scroll(level);
             BLOC_ANIMATION(level);
-            TFR_SCREENM();
+            TFR_SCREENM(level);
             DISPLAY_SPRITES(level);
             flip_screen(true);
 
@@ -200,7 +200,7 @@ uint8 RESET_LEVEL(TITUS_level *level) {
         player->sprite3.x = (BITMAP_X << 4) + (320+120-2);
         player->sprite3.y = (BITMAP_Y << 4) + 100;
         for (i = 0; i < 31; i++) {
-            TFR_SCREENM();
+            TFR_SCREENM(level);
             DISPLAY_SPRITES(level);
             flip_screen(true);
             player->sprite.x += 8;
@@ -261,10 +261,11 @@ int CLEAR_DATA(TITUS_level *level) {
     POCKET_FLAG = 0;
     SAUT_COUNT = 0;
     ACTION_TIMER = 0;
-    XSCROLL_CENTER = 0;
-    YSCROLL_CENTER = 0;
-    XLIMIT_SCROLL = 0;
-    YLIMIT_SCROLL = 0;
+    g_scroll_x = 0;
+    g_scroll_y = 0;
+    g_scroll_x_target = 0;
+    g_scroll_y_target = 0;
+    g_scroll_px_offset = 0;
     YFALL = 0;
 
     TAPISFLY_FLAG = 0;

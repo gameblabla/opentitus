@@ -66,71 +66,84 @@ void DISPLAY_ENERGY(TITUS_level *level);
 int DISPLAY_COUNT(TITUS_level *level);
 int display_sprite(TITUS_level *level, TITUS_sprite *spr);
 
+SDL_Surface* rl_screen;
 
-void TFR_SCREENM() { //Draw tiles on the backbuffer (copy from the tile screen)
+
+int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from the tile screen)
     SDL_Rect src, dest;
+	int r_t, g_t, b_t;
+	int i, j, r, g, b;
+    //SDL_Surface *surface = NULL;
 
 	//First of all: make the screen black, at least the lower part of the screen
     dest.x = 0;
-    dest.y = screen_height * 16;
-    dest.w = screen_width * 16;
-    dest.h = resheight - screen_height * 16;
+    dest.y = screen_height * 16 ;
+    dest.w = screen_width * 19 ;
+    dest.h = resheight - screen_height * 16 ;
     SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, 0, 0, 0));
 
-    // Tile screen:  | Output screen:
-    //               |
-    // D | C         | A | B
-    // -   -         | -   -
-    // B | A         | C | D
-    //
-    // The screens are splitted in 4 parts by BITMAP_XM and BITMAP_YM
-    // The code below will move the 4 rectangles with tiles to their right place on the output screen
-    
-    
-    //Upper left on screen (A)
-    src.x = BITMAP_XM * 16;
-    src.y = BITMAP_YM * 16;
-    src.w = (screen_width - BITMAP_XM) * 16;
-    src.h = (screen_height - BITMAP_YM) * 16;
-    dest.x = 0;
-    dest.y = 0;
-    dest.w = src.w;
-    dest.h = src.h;
-    SDL_BlitSurface(tilescreen, &src, screen, &dest);
+	#ifndef NOAMIGA
+		//Testing: Amiga lines
+	
+		r_t = -128;
+		g_t = -128;
+		b_t = 0;
+		for (i = 0; i < screen_height * 16; i++) {
+			dest.x = 0;
+			dest.y = i ;
+			dest.w = screen_width * 19 ;
+			dest.h = 1;
+			r_t++;
+			g_t++;
+			b_t++;
+			r = r_t;
+			g = g_t;
+			b = b_t;
+			if (r < 0) {
+				r = 0;
+			} else if (r > 255) {
+				r = 255;
+			}
+			if (g < 0) {
+				g = 0;
+			} else if (g > 255) {
+				g = 255;
+			}
+			if (b < 0) {
+				b = 0;
+			} else if (b > 255) {
+				b = 255;
+			}
+		
+			SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, (uint8)r, (uint8)g, (uint8)b));
 
-    //Upper right on screen (B)
-    src.x = 0;
-    src.y = BITMAP_YM * 16;
-    src.w = BITMAP_XM * 16;
-    src.h = (screen_height - BITMAP_YM) * 16;
-    dest.x = (screen_width - BITMAP_XM) * 16;
-    dest.y = 0;
-    dest.w = src.w;
-    dest.h = src.h;
-    SDL_BlitSurface(tilescreen, &src, screen, &dest);
+		}
+	#endif
 
-    //Lower left on screen (C)
-    src.x = BITMAP_XM * 16;
-    src.y = 0;
-    src.w = (screen_width - BITMAP_XM) * 16;
-    src.h = BITMAP_YM * 16;
-    dest.x = 0;
-    dest.y = (screen_height - BITMAP_YM) * 16;
-    dest.w = src.w;
-    dest.h = src.h;
-    SDL_BlitSurface(tilescreen, &src, screen, &dest);
-
-    //Lower right on screen (D)
     src.x = 0;
     src.y = 0;
-    src.w = BITMAP_XM * 16;
-    src.h = BITMAP_YM * 16;
-    dest.x = (screen_width - BITMAP_XM) * 16;
-    dest.y = (screen_height - BITMAP_YM) * 16;
+    src.w = 16;
+    src.h = 16;
     dest.w = src.w;
     dest.h = src.h;
-    SDL_BlitSurface(tilescreen, &src, screen, &dest);
+
+    for (int x = -1; x < 21; x++) {
+        int tileX = BITMAP_X + x;
+        if(tileX < 0) {
+            continue;
+        }
+        if(tileX >= level->width) {
+            continue;
+        }
+        for (int y = 0; y < 12; y++) {
+            dest.x = 16 + x * 16;
+            dest.y = y * 16;
+            auto tile = level->tilemap[BITMAP_Y + y][tileX];
+            SDL_BlitSurface(level->tile[level->tile[tile].animation[tile_anim]].tiledata, &src, screen, &dest);
+        }
+    }
 }
+
 
 
 //Loop through all sprites, and draw the sprites that should be visible on the screen (NOT by using the visible flag, it uses the coordinates)
@@ -140,6 +153,7 @@ void TFR_SCREENM() { //Draw tiles on the backbuffer (copy from the tile screen)
 void DISPLAY_SPRITES(TITUS_level *level) {
     int16 i;
     char buffer[7]; //xxx ms
+    int screen_limit;
 
     for (i = level->elevatorcount - 1; i >= 0; i--) {
         display_sprite(level, &(level->elevator[i].sprite));
@@ -199,6 +213,8 @@ void DISPLAY_SPRITES(TITUS_level *level) {
 int display_sprite(TITUS_level *level, TITUS_sprite *spr) {
     SDL_Surface *image;
     SDL_Rect src, dest;
+    int screen_limit;
+    
     if (!spr->enabled) {
         return 1;
     }
@@ -209,13 +225,14 @@ int display_sprite(TITUS_level *level, TITUS_sprite *spr) {
     //At this point, the buffer should be the correct size
 
     if (!spr->flipped) {
-        dest.x = spr->x - spr->spritedata->refwidth - (BITMAP_X << 4);
+        dest.x = spr->x - spr->spritedata->refwidth - (BITMAP_X << 4) + 16;
     } else {
-        dest.x = spr->x + spr->spritedata->refwidth - spr->spritedata->data->w - (BITMAP_X << 4);
+        dest.x = spr->x + spr->spritedata->refwidth - spr->spritedata->data->w - (BITMAP_X << 4) + 16;
     }
     dest.y = spr->y + spr->spritedata->refheight - spr->spritedata->data->h + 1 - (BITMAP_Y << 4);
-    
-    if ((dest.x >= screen_width * 16) || //Right for the screen
+	screen_limit = screen_width + 2;
+
+    if ((dest.x >= screen_limit * 16) || //Right for the screen
       (dest.x + spr->spritedata->data->w < 0) || //Left for the screen
       (dest.y + spr->spritedata->data->h < 0) || //Above the screen
       (dest.y >= screen_height * 16)) { //Below the screen
@@ -250,8 +267,8 @@ int display_sprite(TITUS_level *level, TITUS_sprite *spr) {
         src.h -= src.y;
         dest.y = 0;
     }
-    if (dest.x + src.w > screen_width * 16) {
-        src.w = screen_width * 16 - dest.x;
+    if (dest.x + src.w > screen_limit * 16) {
+        src.w = screen_limit * 16 - dest.x;
     }
     if (dest.y + src.h > screen_height * 16) {
         src.h = screen_height * 16 - dest.y;
@@ -321,7 +338,7 @@ SDL_Surface *sprite_from_cache(TITUS_level *level, TITUS_sprite *spr) {
 		
 void flip_screen(bool slow) {
     int tick = SDL_GetTicks();
-    SDL_Flip(screen);
+    Flip_Titus();
     int oldtick = tick;
     tick = SDL_GetTicks();
     SUBTIME[14] = tick - oldtick;
@@ -450,7 +467,7 @@ int viewstatus(TITUS_level *level, bool countbonus){
     sprintf(tmpchars, "%d", level->lives);
     SDL_Print_Text(tmpchars, 28 * 8 - strlen(tmpchars) * 8, 11 * 12);
 
-    SDL_Flip(screen);
+    Flip_Titus();
 
     if (countbonus && (level->extrabonus >= 10)) {
         retval = waitforbutton();
@@ -462,7 +479,7 @@ int viewstatus(TITUS_level *level, bool countbonus){
                 level->extrabonus--;
                 sprintf(tmpchars, "%2d", level->extrabonus);
                 SDL_Print_Text(tmpchars, 28 * 8 - strlen(tmpchars) * 8, 10 * 12);
-                SDL_Flip(screen);
+                Flip_Titus();
                 for (j = 0; j < 15; j++) {
                     NO_FAST_CPU(false);
                 }
@@ -470,7 +487,7 @@ int viewstatus(TITUS_level *level, bool countbonus){
             level->lives++;
             sprintf(tmpchars, "%d", level->lives);
             SDL_Print_Text(tmpchars, 28 * 8 - strlen(tmpchars) * 8, 11 * 12);
-            SDL_Flip(screen);
+            Flip_Titus();
             for (j = 0; j < 10; j++) {
                 NO_FAST_CPU(false);
             }
@@ -482,7 +499,7 @@ int viewstatus(TITUS_level *level, bool countbonus){
         return retval;
 
     SDL_FillRect(screen, NULL, 0);
-    SDL_Flip(screen);
+    Flip_Titus();
 
     return (0);
 }
@@ -501,10 +518,8 @@ int INIT_SCREENM(TITUS_level *level) {
     }
     do {
         scroll(level);
-    } while (YSCROLL_CENTER || XSCROLL_CENTER);
-    OPEN_SCREEN();
-    
-    return 0;
+    } while (g_scroll_y || g_scroll_x);
+    OPEN_SCREEN(level);
 }
 
 
@@ -519,7 +534,7 @@ int DISPLAY_COUNT(TITUS_level *level) {
 
 
 void DISPLAY_ENERGY(TITUS_level *level) {
-    uint8 offset = 96;
+    uint8 offset = 96 + 16 - g_scroll_px_offset;
     uint8 i;
     SDL_Rect dest;
     for (i = 0; i < level->player.hp; i++) { //Draw big bars (4px*16px, spacing 4px)
@@ -598,7 +613,7 @@ int fadeout() {
         SDL_SetAlpha(image, SDL_SRCALPHA, 255 - image_alpha);
         SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
         SDL_BlitSurface(image, &src, screen, &dest);
-        SDL_Flip(screen);
+        Flip_Titus();
 
 #ifdef AUDIO_MIKMOD_SINGLETHREAD
         checkmodule();
@@ -620,10 +635,13 @@ int view_password(TITUS_level *level, uint8 level_index) {
     //Display the password !
     char tmpchars[10];
     int retval;
-
+	int saved_value;
     CLOSE_SCREEN();
     SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
-    SDL_Flip(screen);
+    Flip_Titus();
+
+    saved_value = g_scroll_px_offset;
+    g_scroll_px_offset = 0;
 
     if (game == 0) { //Titus
         SDL_Print_Text("LEVEL", 13 * 8, 13 * 8);
@@ -636,14 +654,29 @@ int view_password(TITUS_level *level, uint8 level_index) {
     SDL_Print_Text("CODE", 14 * 8, 10 * 8);
     SDL_Print_Text(levelcode[level_index], 20 * 8, 10 * 8);
 
-    SDL_Flip(screen);
+    Flip_Titus();
     retval = waitforbutton();
+    g_scroll_px_offset = saved_value;
     if (retval < 0)
         return retval;
 
-    //SDL_Flip(screen);
+    //Flip_Titus();
     OPEN_SCREEN();
     return (0);
+}
+
+
+void Flip_Titus()
+{
+    SDL_Rect src;
+    src.x = 16 - g_scroll_px_offset;
+    src.y = 0;
+    src.w = 320;
+    src.h = 200;
+    SDL_Rect dst = src;
+    dst.x = 0;
+	SDL_BlitSurface(screen, &src, rl_screen, &dst);
+	SDL_Flip(rl_screen);
 }
 
 int loadpixelformat(SDL_PixelFormat **pixelformat){

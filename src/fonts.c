@@ -240,7 +240,7 @@ SDL_Surface * SDL_LoadChar(unsigned char * fontdata, int offset, SDL_PixelFormat
 
 
 int freefonts(void) {
-    freesubfont(font);
+    if (font) freesubfont(font);
     return 0;
 }
 
@@ -469,7 +469,7 @@ int SDL_Print_Text(char *text, int x, int y){
     
     src.x = 0;
     src.y = 0;
-    dest.x = x;
+    dest.x = x + 16;
     dest.y = y;
 
     for (i = 0; i < strlen(text); i++) {
@@ -549,7 +549,7 @@ int viewintrotext(){
     SDL_Print_Text(" PROGRAMMED IN 1991 ON AT .286 12MHZ.", 0, 12 * 12);
     SDL_Print_Text("   . . . ENJOY MOKTAR ADVENTURE !!", 0, 13 * 12);
 
-    SDL_Flip(screen);
+    Flip_Titus();
 
     retval = waitforbutton();
     if (retval < 0)
@@ -561,11 +561,38 @@ int viewintrotext(){
     SDL_Print_Text("REPROGRAMMED IN 2011 ON X86_64 2.40 GHZ.", 0, 12 * 12);
     SDL_Print_Text("   . . . ENJOY MOKTAR ADVENTURE !!", 0, 13 * 12);
 
-    SDL_Flip(screen);
+    Flip_Titus();
 
     retval = waitforbutton();
     if (retval < 0)
         return retval;
 
     return (0);
+}
+
+
+
+int nogame_data(){
+    int retval;
+	print_string("MISSING GAME DATA !", 0xFFFF, 0, 24, 16, screen->pixels);
+	#if defined(DREAMCAST)
+	print_string("Make sure to put it on your SD card", 0xFFFF, 0, 24, 48, screen->pixels);
+	print_string("OR", 0xFFFF, 0, 24, 64, screen->pixels);
+	print_string("rebuild the ISO with data inside.", 0xFFFF, 0, 24, 80, screen->pixels);
+	
+	print_string("SD card needs to be formatted in", 0xFFFF, 0, 24, 96, screen->pixels);
+	print_string("FAT32 format and be plugged to the", 0xFFFF, 0, 24, 96+16, screen->pixels);
+	print_string("serial port with external adapter.", 0xFFFF, 0, 24, 96+32, screen->pixels);
+	print_string("(NOT GDEMU/ODE !)", 0xFFFF, 0, 24, 96+48, screen->pixels);
+	#elif defined(HOME_SUPPORT)
+	print_string("Make sure to put it in $HOME/.opentitus", 0xFFFF, 0, 24, 48, screen->pixels);
+	#else
+	print_string("Make sure to put it relative", 0xFFFF, 0, 24, 48, screen->pixels);
+	print_string("to the executable.", 0xFFFF, 0, 24, 64, screen->pixels);
+	#endif
+	print_string("Press any button to reset", 0xFFFF, 0, 24, 176, screen->pixels);
+    Flip_Titus();
+
+    waitforbutton();
+    return 1;
 }

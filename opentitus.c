@@ -26,15 +26,11 @@
  * Main source file
  */
  
-#ifdef NSPIRE
-#include <os.h>
-#include <libndls.h>
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "SDL/SDL.h"
+#include "globals.h"
 //#include "opentitus.h"
 
 //Probably not the best way, but it works...
@@ -72,32 +68,41 @@ int main(int argc, char *argv[])
 	enable_relative_paths(argv);
 #endif
 
-#ifdef HOME_SUPPORT 
-	char path_folder[512];
-	sprintf(path_folder, "%s/.opentitus", getenv("HOME"));
-    mkdir(path_folder,0755);
+#ifdef HOME_PATH
+	char home_path[256];
+	snprintf(home_path, sizeof(home_path), "%s/.opentitus", getenv("HOME"));
+	if (access( home_path, F_OK ) == -1)
+	{
+		mkdir(home_path, 0755);
+		nogame_data();
+        state = 0;
+        goto exitgame;
+	}
 #endif
   
     retval = init_opentitus();
     
     if (retval < 0)
+    {
+		nogame_data();
         state = 0;
+        goto exitgame;
+    } 
 
-#ifndef DREAMCAST
+/*
     if (state) 
     {
         retval = viewintrotext();
         if (retval < 0)
             state = 0;
     }
-
+*/
     if (state) 
     {
         retval = viewimage(tituslogofile, tituslogoformat, 0, 4000);
         if (retval < 0)
             state = 0;
     }
-#endif
 
 #ifdef AUDIO_ENABLED
     SELECT_MUSIC(15);
@@ -122,6 +127,7 @@ int main(int argc, char *argv[])
         }
     }
     
+exitgame:
     freefonts();
 
 #ifdef AUDIO_ENABLED
@@ -139,7 +145,7 @@ int main(int argc, char *argv[])
 }
 
 int init_opentitus() {
-
+	int flags;
     int retval;
 	char path_folder[512];
 
@@ -149,18 +155,35 @@ int init_opentitus() {
 	#ifdef NSPIRE
 		sprintf(path_folder, "/documents/opentitus/%s.tns", OPENTITUS_CONFIG_FILE);
 	#elif defined(DREAMCAST)
+		#ifdef SDCARD_DREAMCAST
+		if(sd_init()) 
+		{
+			printf("No SD card detected. Make sure to have SD card !\n");
+		}
+		else
+		{
+			is_sdcard = 1;
+			sd_blockdev_for_partition(0, &sd_dev, &partition_type);
+			fs_fat_init();
+			fs_fat_mount("/sd", &sd_dev, FS_FAT_MOUNT_READONLY);
+		}
+		#endif
 		sprintf(path_folder, "/cd/%s", OPENTITUS_CONFIG_FILE);
+		SDL_DC_SetVideoDriver(SDL_DC_DMA_VIDEO);
 	#else
 		sprintf(path_folder, "./%s", OPENTITUS_CONFIG_FILE);
 	#endif
 #endif
 
     retval = readconfig(path_folder);
-  
     if (retval < 0)
     {
+		// Make sure to init at least something
+		SDL_Init(SDL_INIT_VIDEO);
+		screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 320 + 32, 200, 16, 0, 0, 0, 0);
+		rl_screen = SDL_SetVideoMode(320, 200, 0, SDL_SWSURFACE | SDL_DOUBLEBUF);
         return retval;
-    }
+	}
 
 #ifdef AUDIO_ENABLED
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
@@ -174,32 +197,34 @@ int init_opentitus() {
     }
 #endif
 
-#if defined(_DINGUX)
-    SDL_ShowCursor(SDL_DISABLE);
-    screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, SDL_SWSURFACE);
+	SDL_ShowCursor(SDL_DISABLE);
+#if defined(_DINGUX) 
+	flags = SDL_SWSURFACE;
 #elif defined(DREAMCAST)
-    SDL_ShowCursor(SDL_DISABLE);
-    screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, SDL_HWSURFACE | SDL_DOUBLEBUF);
-#elif defined(NSPIRE)
-    SDL_ShowCursor(SDL_DISABLE);
-    screen = SDL_SetVideoMode(reswidth, resheight, has_colors ? 16 : 8, SDL_SWSURFACE);
+	flags = SDL_HWSURFACE | SDL_DOUBLEBUF;
+	SDL_DC_SetVideoDriver(SDL_DC_DMA_VIDEO);
+#elif defined(_TINSPIRE)
+	flags = SDL_SWSURFACE;
 #elif defined(GCW)
-    SDL_ShowCursor(SDL_DISABLE);
-    screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, SDL_HWSURFACE | SDL_TRIPLEBUF);
+	flags = SDL_HWSURFACE | SDL_TRIPLEBUF;
 #else
     switch (videomode) {
     case 0: //window mode
-        screen = SDL_SetVideoMode(reswidth, resheight, 0, SDL_HWSURFACE | SDL_DOUBLEBUF);
+		SDL_ShowCursor(SDL_ENABLE);
+        flags = SDL_HWSURFACE | SDL_DOUBLEBUF;
         SDL_WM_SetCaption(OPENTITUS_WINDOW_TEXT, 0);
         break;
     case 1: //fullscreen
         SDL_ShowCursor(SDL_DISABLE);
-        screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, SDL_DOUBLEBUF | SDL_FULLSCREEN);
+        flags = SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_FULLSCREEN;
         break;
     }
 #endif
 
-    if (screen == NULL) {
+	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, reswidth + 32, resheight, bitdepth, 0, 0, 0, 0);
+	rl_screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, flags);
+	 
+    if (rl_screen == NULL) {
         printf("Unable to set video mode: %s\n", SDL_GetError());
         return TITUS_ERROR_SDL_ERROR;
     }
