@@ -134,6 +134,9 @@ exitgame:
     freeaudio();
 #endif
 
+	if (screen) SDL_FreeSurface(screen);
+	if (rl_screen) SDL_FreeSurface(rl_screen);
+
     SDL_Quit();
 
     checkerror();
@@ -180,7 +183,7 @@ int init_opentitus() {
     {
 		// Make sure to init at least something
 		SDL_Init(SDL_INIT_VIDEO);
-		screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 320 + 32, 200, 16, 0, 0, 0, 0);
+		screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 320 + (SCROLL_OFFSET*2), 200, 16, 0, 0, 0, 0);
 		rl_screen = SDL_SetVideoMode(320, 200, 0, SDL_SWSURFACE | SDL_DOUBLEBUF);
         return retval;
 	}
@@ -221,8 +224,8 @@ int init_opentitus() {
     }
 #endif
 
-	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, reswidth + 32, resheight, bitdepth, 0, 0, 0, 0);
-	rl_screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, flags);
+	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, reswidth + (SCROLL_OFFSET*2), resheight, bitdepth, 0, 0, 0, 0);
+	rl_screen = SDL_SetVideoMode(320, 240, bitdepth, flags);
 	 
     if (rl_screen == NULL) {
         printf("Unable to set video mode: %s\n", SDL_GetError());

@@ -48,6 +48,54 @@ extern bool D_SCROLL(TITUS_level *level);
 extern int SELECT_MUSIC(int song_number);
 extern int WAIT_SONG();
 
+
+int drawlines(int16 destX, int16 destY, int16 width, int16 height) {
+    SDL_Rect dest;
+    int r_t, g_t, b_t;
+    int i, j, r, g, b;
+
+
+
+    //Testing: Amiga lines
+
+    r_t = -128;
+    g_t = -128;
+    b_t = 0;
+    dest.x = destX ;
+    dest.w = width ;
+    for (i = 0; i < screen_height * 16; i++) {
+        dest.y = i ;
+        dest.h = 1;
+        r_t++;
+        g_t++;
+        b_t++;
+        r = r_t;
+        g = g_t;
+        b = b_t;
+        if (r < 0) {
+            r = 0;
+        } else if (r > 255) {
+            r = 255;
+        }
+        if (g < 0) {
+            g = 0;
+        } else if (g > 255) {
+            g = 255;
+        }
+        if (b < 0) {
+            b = 0;
+        } else if (b > 255) {
+            b = 255;
+        }
+        
+        if ((i >= destY) && (i < destY + height)) {
+            SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, (uint8)r, (uint8)g, (uint8)b));
+        }
+    }
+
+}
+
+
 int CROSSING_GATE(TITUS_level *level) { //Check and handle level completion, and if the player does a kneestand on a secret entrance
     check_finish(level);
     check_gates(level);
@@ -189,6 +237,12 @@ int OPEN_SCREEN(TITUS_level *level) {
     for (i = 2; i <= step_count * 2; i += 2) {
         j--;
         flip_screen(false); //quick flip TODO: move to other end of loop?
+        #ifndef NOAMIGA
+            drawlines( j * blockX , j * blockY , ((i * blockX) - blockX) , blockY ); //Upper tiles
+            drawlines(((j * blockX) + (i * blockX) - blockX) , j * blockY , blockX , i * blockY ); //Right tiles
+            drawlines(((j * blockX) + blockX) , (((j + 1) * blockY) + (i * blockY) - blockY) , ((i * blockX) - blockX) , blockY ); //Bottom tiles
+            drawlines( j * blockX , ((j * blockY) + blockY) , blockX , i * blockY ); //Left tiles
+        #endif
         copytiles( j * blockX, j * blockY, (i * blockX) - blockX, blockY); //Upper tiles
         copytiles((j * blockX) + (i * blockX) - blockX, j * blockY, blockX, i * blockY); //Right tiles
         copytiles((j * blockX) + blockX, ((j + 1) * blockY) + (i * blockY) - blockY, (i * blockX) - blockX, blockY); //Bottom tiles

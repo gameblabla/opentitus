@@ -244,6 +244,9 @@ extern uint8 BIGNMI_POWER; //Lives of the boss
 extern bool boss_alive; //True if the boss is alive
 extern uint8 AUDIOMODE;
 
+extern Uint32 sky_colour;
+extern uint8 orig_sky_colour[16];
+
 extern bool GODMODE; //If true, the player will not interfere with the enemies
 extern bool NOCLIP; //If true, the player will move noclip
 extern bool DISPLAYLOOPTIME; //If true, display loop time in milliseconds
@@ -272,6 +275,8 @@ extern uint16 level_code[16];
 extern void Flip_Titus();
 
 extern SDL_Surface* rl_screen;
+
+#define SCROLL_OFFSET 64
 
 #endif
 

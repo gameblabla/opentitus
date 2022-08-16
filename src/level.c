@@ -99,7 +99,7 @@ int loadlevel(TITUS_level *level, unsigned char *leveldata, int leveldatasize, T
     offset = level->height * level->width;
     j = 256; //j is used for "last tile with animation flag"
     for (i = 0; i < 256; i++) {
-        level->tile[i].tiledata = SDL_LoadTile(leveldata, offset + i * 128, level->pixelformat);
+        level->tile[i].tiledata = SDL_LoadTile(level, leveldata, offset + i * 128, level->pixelformat);
         level->tile[i].current = i;
         level->tile[i].horizflag = leveldata[offset + 32768 + i] & 0xFF;
         level->tile[i].floorflag = leveldata[offset + 32768 + 256 + i] & 0xFF;

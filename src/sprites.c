@@ -201,14 +201,19 @@ int freespritecache(TITUS_spritecache *spritecache) {
 }
 
 
-SDL_Surface * SDL_LoadTile(unsigned char * first, int i, SDL_PixelFormat * pixelformat){
+SDL_Surface * SDL_LoadTile(TITUS_level *level, unsigned char * first, int i, SDL_PixelFormat * pixelformat){
     SDL_Surface *surface = NULL;
     SDL_Surface *surface2 = NULL;
     char *tmpchar;
     int j, k;
     surface = SDL_CreateRGBSurface(SDL_SWSURFACE, 16, 16, 8, 0, 0, 0, 0);
-
     copypixelformat(surface->format, pixelformat);
+    
+	if (orig_sky_colour[level->levelnumber] != 0) {
+		SDL_SetColorKey(surface, SDL_SRCCOLORKEY|SDL_RLEACCEL, orig_sky_colour[level->levelnumber]); //TESTING: Set transparent colour
+	} else {
+		SDL_SetColorKey(surface, 0, 0); //Clear transparent colour
+	}
 
     tmpchar = (char *)surface->pixels;
     for (j = i; j < i + 0x20; j++) {

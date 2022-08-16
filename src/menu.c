@@ -143,7 +143,7 @@ int viewmenu(char * menufile, int menuformat) {
     src.w = image->w;
     src.h = image->h;
 	
-    dest.x = 16;
+    dest.x = SCROLL_OFFSET;
     dest.y = 0;
     dest.w = image->w;
     dest.h = image->h;
@@ -175,9 +175,9 @@ int viewmenu(char * menufile, int menuformat) {
     }
 
     sel_dest[0] = sel[0];
-    sel_dest[0].x += 16;
+    sel_dest[0].x += SCROLL_OFFSET;
     sel_dest[1] = sel[1];
-    sel_dest[1].x += 16;
+    sel_dest[1].x += SCROLL_OFFSET;
 
     tick_start = SDL_GetTicks();
 

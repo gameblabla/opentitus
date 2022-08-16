@@ -84,14 +84,13 @@ int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from 
 
 	#ifndef NOAMIGA
 		//Testing: Amiga lines
-	
 		r_t = -128;
 		g_t = -128;
 		b_t = 0;
 		for (i = 0; i < screen_height * 16; i++) {
 			dest.x = 0;
 			dest.y = i ;
-			dest.w = screen_width * 19 ;
+			dest.w = screen_width * 19 + 3;
 			dest.h = 1;
 			r_t++;
 			g_t++;
@@ -114,9 +113,7 @@ int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from 
 			} else if (b > 255) {
 				b = 255;
 			}
-		
 			SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, (uint8)r, (uint8)g, (uint8)b));
-
 		}
 	#endif
 
@@ -136,9 +133,9 @@ int TFR_SCREENM(TITUS_level *level) { //Draw tiles on the backbuffer (copy from 
             continue;
         }
         for (int y = 0; y < 12; y++) {
-            dest.x = 16 + x * 16;
+            dest.x = SCROLL_OFFSET + x * 16;
             dest.y = y * 16;
-            auto tile = level->tilemap[BITMAP_Y + y][tileX];
+            int tile = level->tilemap[BITMAP_Y + y][tileX];
             SDL_BlitSurface(level->tile[level->tile[tile].animation[tile_anim]].tiledata, &src, screen, &dest);
         }
     }
@@ -225,12 +222,12 @@ int display_sprite(TITUS_level *level, TITUS_sprite *spr) {
     //At this point, the buffer should be the correct size
 
     if (!spr->flipped) {
-        dest.x = spr->x - spr->spritedata->refwidth - (BITMAP_X << 4) + 16;
+        dest.x = spr->x - spr->spritedata->refwidth - (BITMAP_X << 4) + SCROLL_OFFSET;
     } else {
-        dest.x = spr->x + spr->spritedata->refwidth - spr->spritedata->data->w - (BITMAP_X << 4) + 16;
+        dest.x = spr->x + spr->spritedata->refwidth - spr->spritedata->data->w - (BITMAP_X << 4) + SCROLL_OFFSET;
     }
     dest.y = spr->y + spr->spritedata->refheight - spr->spritedata->data->h + 1 - (BITMAP_Y << 4);
-	screen_limit = screen_width + 2;
+	screen_limit = screen_width + 2 + 3;
 
     if ((dest.x >= screen_limit * 16) || //Right for the screen
       (dest.x + spr->spritedata->data->w < 0) || //Left for the screen
@@ -534,7 +531,7 @@ int DISPLAY_COUNT(TITUS_level *level) {
 
 
 void DISPLAY_ENERGY(TITUS_level *level) {
-    uint8 offset = 96 + 16 - g_scroll_px_offset;
+    int offset = 96 + (SCROLL_OFFSET) - g_scroll_px_offset;
     uint8 i;
     SDL_Rect dest;
     for (i = 0; i < level->player.hp; i++) { //Draw big bars (4px*16px, spacing 4px)
@@ -668,13 +665,17 @@ int view_password(TITUS_level *level, uint8 level_index) {
 
 void Flip_Titus()
 {
-    SDL_Rect src;
-    src.x = 16 - g_scroll_px_offset;
+    SDL_Rect src, dst;
+    int x_tmp = SCROLL_OFFSET - g_scroll_px_offset;
+    src.x = x_tmp;
     src.y = 0;
     src.w = 320;
     src.h = 200;
-    SDL_Rect dst = src;
+    
     dst.x = 0;
+    dst.y = 20;
+    dst.w = 320;
+    dst.h = 200;
 	SDL_BlitSurface(screen, &src, rl_screen, &dst);
 	SDL_Flip(rl_screen);
 }

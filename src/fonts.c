@@ -38,6 +38,7 @@
 #include "tituserror.h"
 #include "keyboard.h"
 #include "draw.h"
+#include "globals.h"
 #include <time.h>
 
 SDL_Surface * SDL_LoadChar(unsigned char * fontdata, int offset, SDL_PixelFormat * pixelformat);
@@ -469,7 +470,7 @@ int SDL_Print_Text(char *text, int x, int y){
     
     src.x = 0;
     src.y = 0;
-    dest.x = x + 16;
+    dest.x = x + SCROLL_OFFSET;
     dest.y = y;
 
     for (i = 0; i < strlen(text); i++) {

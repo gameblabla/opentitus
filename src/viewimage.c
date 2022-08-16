@@ -144,7 +144,7 @@ int viewimage(char * imagefile, int imageformat, int displayformat, int delay) {
     src.w = image->w;
     src.h = image->h;
 	
-    dest.x = 16;
+    dest.x = SCROLL_OFFSET;
     dest.y = 0;
     dest.w = image->w;
     dest.h = image->h;

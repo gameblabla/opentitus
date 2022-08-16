@@ -158,6 +158,14 @@ int playtitus(int firstlevel){
             return retval;
         }
         first = true;
+        
+		sky_colour = level.tile[0].tiledata->format->colorkey;
+		#ifdef NOAMIGA
+			for (i = 0; i < 256; i++) {
+				SDL_SetColorKey(level.tile[i].tiledata, 0, 0); //Clear transparent colour
+			}
+		#endif
+        
         while (1) {
 #ifdef AUDIO_ENABLED
             SELECT_MUSIC(0);
