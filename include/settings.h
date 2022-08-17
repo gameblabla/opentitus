@@ -33,6 +33,7 @@
 #define OPENTITUS_CONFIG_FILE "app0:/titus_vita.conf"
 #else
 #define OPENTITUS_CONFIG_FILE "titus.conf"
+#define MOKTAR_CONFIG_FILE "titus_moktar.conf"
 #endif
 #define OPENTITUS_WINDOW_TEXT "OpenTitus"
 

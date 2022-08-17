@@ -872,7 +872,7 @@ void Flip_Titus()
     SDL_LockSurface(rl_screen);
 	uint32_t *s = (uint32_t*)screen->pixels + ((16 - g_scroll_px_offset) >> 1);
 	uint32_t *d = (uint32_t*)rl_screen->pixels;
-	for(i = 0; i < 191; i++, s += (352/2), d += 160)
+	for(i = 0; i < resheight-1; i++, s += (352/2), d += 160)
 	{
 		#ifdef DREAMCAST
 		memcpy

@@ -79,7 +79,6 @@ int main(int argc, char *argv[]) {
     int retval;
     int state = 1; //View the menu when the main loop starts
     retval = init();
-    printf("retval %d\n", retval);
     if (retval < 0)
     {
 		nogame_data();
@@ -163,23 +162,22 @@ exitgame:
     return retval;
 }
 
-int init() {
-	int flags;
-    int retval;
-	char path_folder[256];
 
+static char path_folder[192];
+static void open_config(const char* file)
+{
 #ifdef HOME_SUPPORT 
 	FILE* fp;
-	sprintf(path_folder, "%s/.opentitus/%s", getenv("HOME"), OPENTITUS_CONFIG_FILE);
+	sprintf(path_folder, "%s/.opentitus/%s", getenv("HOME"), file);
 	fp = fopen(path_folder, "rb");
 	if (!fp)
 	{
-		sprintf(path_folder, "./%s", OPENTITUS_CONFIG_FILE);
+		sprintf(path_folder, "./%s", file);
 	}
 	else { fclose(fp); }
 #else
 	#ifdef _TINSPIRE
-		sprintf(path_folder, "/documents/opentitus/%s.tns", OPENTITUS_CONFIG_FILE);
+		sprintf(path_folder, "/documents/opentitus/%s.tns", file);
 	#elif defined(DREAMCAST)
 		#ifdef SDCARD_ENABLED
 		if(sd_init()) 
@@ -197,20 +195,33 @@ int init() {
 		cont_btn_callback(0, CONT_START | CONT_A | CONT_B | CONT_X | CONT_Y, (void (*)(unsigned char, long  unsigned int))arch_exit);
 		SDL_DC_SetVideoDriver(SDL_DC_DMA_VIDEO);
 		SDL_DC_VerticalWait(1);
-		sprintf(path_folder, "/cd/%s", OPENTITUS_CONFIG_FILE);
+		sprintf(path_folder, "/cd/%s", file);
 	#else
-		sprintf(path_folder, "./%s", OPENTITUS_CONFIG_FILE);
+		sprintf(path_folder, "./%s", file);
 	#endif
 #endif
+}
 
+int init() {
+	int flags;
+    int retval;
+
+	// Find Titus the fox first
+	open_config(OPENTITUS_CONFIG_FILE);
     retval = readconfig(path_folder);
     if (retval < 0)
     {
-		// Make sure to init at least something
-		SDL_Init(SDL_INIT_VIDEO);
-		screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 320 + 32, 192, 16, 0, 0, 0, 0);
-		rl_screen = SDL_SetVideoMode(320, 192, 0, SDL_SWSURFACE | SDL_DOUBLEBUF);
-        return retval;
+		// If not, find Moktar instead
+		open_config(MOKTAR_CONFIG_FILE);
+		retval = readconfig(path_folder);
+		if (retval < 0)
+		{
+			// Make sure to init at least something
+			SDL_Init(SDL_INIT_VIDEO);
+			screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 320 + 32, 200, 16, 0, 0, 0, 0);
+			rl_screen = SDL_SetVideoMode(320, 200, 16, SDL_SWSURFACE);
+			return retval;
+		}
 	}
 	
 #ifdef AUDIO_ENABLED
@@ -256,7 +267,7 @@ int init() {
 	
 #endif
 
-	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, reswidth + 32, 200, bitdepth, 0, 0, 0, 0);
+	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, reswidth + 32, resheight, bitdepth, 0, 0, 0, 0);
 	rl_screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, flags);
 	 
     if (rl_screen == NULL) {

@@ -663,12 +663,12 @@ int initaudio(){
 	#if defined(_TINSPIRE)
 		sprintf(path_work, "./%s.tns", audiofile);
 	#elif defined(DREAMCAST)
-		sprintf(path_work, "/sd/%s", audiofile);
+		sprintf(path_work, "/cd/%s", audiofile);
 		ifp = fopen(path_work, "rb");
 		if (ifp == NULL) {
-			sprintf(path_work, "/cd/%s", audiofile);
+			sprintf(path_work, "/sd/%s", audiofile);
 		}
-		else { fclose(ifp); }
+		else fclose(ifp);
 	#else
 		sprintf(path_work, "%s", audiofile);
     #endif
