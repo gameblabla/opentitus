@@ -598,8 +598,8 @@ int DISPLAY_COUNT(TITUS_level *level) {
 
 
 int DISPLAY_ENERGY(TITUS_level *level) {
-    uint8 offset = 96 + 16 - g_scroll_px_offset;
-    uint8 i;
+    int offset = (96 + 16) - g_scroll_px_offset;
+    int i;
     SDL_Rect dest;
     for (i = 0; i < level->player.hp; i++) { //Draw big bars (4px*16px, spacing 4px)
         dest.x = offset ;
@@ -856,12 +856,32 @@ int freepixelformat(SDL_PixelFormat **pixelformat){
 
 void Flip_Titus()
 {
+	int i;
     SDL_Rect src, dst;
+    #ifdef NORMAL_SDL
     src.x = 16 - g_scroll_px_offset;
     dst.y = src.y = 0;
     dst.w = src.w = reswidth;
     dst.h = src.h = resheight;
     dst.x = 0;
+    dst.y = 20;
 	SDL_BlitSurface(screen, &src, rl_screen, &dst);
-	SDL_Flip(rl_screen);	
+	SDL_Flip(rl_screen);
+    #else
+    /* This kludgery is required on Dreamcast otherwise... it will just crash...*/
+    SDL_LockSurface(rl_screen);
+	uint32_t *s = (uint32_t*)screen->pixels + ((16 - g_scroll_px_offset) >> 1);
+	uint32_t *d = (uint32_t*)rl_screen->pixels;
+	for(i = 0; i < 191; i++, s += (352/2), d += 160)
+	{
+		#ifdef DREAMCAST
+		memcpy
+		#else
+		memmove
+		#endif
+		(d, s, ((352)*2));
+	}
+	SDL_UnlockSurface(rl_screen);
+	SDL_Flip(rl_screen);
+	#endif	
 }

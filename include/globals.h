@@ -52,15 +52,18 @@ extern uint8 partition_type;
 extern kos_blockdev_t sd_dev;
 extern int is_sdcard;
 #define JUMP_BUTTON (state->buttons & CONT_DPAD_UP || state->buttons & CONT_A)
-#define UP_BUTTON (state->buttons & CONT_DPAD_UP)
-#define DOWN_BUTTON (state->buttons & CONT_DPAD_DOWN)
+#define UP_BUTTON (state->buttons & CONT_DPAD_UP || state->joyy < 0)
+#define DOWN_BUTTON (state->buttons & CONT_DPAD_DOWN || state->joyy > 0)
 #define SPACE_BUTTON (state->buttons & CONT_A)
-#define LEFT_BUTTON (state->buttons & CONT_DPAD_LEFT)
-#define RIGHT_BUTTON (state->buttons & CONT_DPAD_RIGHT)
+#define LEFT_BUTTON (state->buttons & CONT_DPAD_LEFT || state->joyx < 0)
+#define RIGHT_BUTTON (state->buttons & CONT_DPAD_RIGHT || state->joyx > 0)
 
 #define THROW_BUTTON (state->buttons & CONT_B)
+#define PAUSE_BUTTON (state->buttons & CONT_START)
 
 #define POLL_CONTROLS cont = maple_enum_type(0, MAPLE_FUNC_CONTROLLER); state = (cont_state_t *) maple_dev_status(cont); 
+
+extern int buttonPressed_DC(int key);
 #else
 #define JUMP_BUTTON (keystate[KEY_UP] || buttonPressed(KEY_UP)) || (keystate[KEY_JUMP] || buttonPressed(KEY_JUMP))
 #define UP_BUTTON (keystate[KEY_UP] || buttonPressed(KEY_UP))
@@ -69,6 +72,7 @@ extern int is_sdcard;
 #define LEFT_BUTTON (keystate[KEY_LEFT] || buttonPressed(KEY_LEFT))
 #define RIGHT_BUTTON (keystate[KEY_RIGHT] || buttonPressed(KEY_RIGHT))
 #define THROW_BUTTON (keystate[KEY_SPACE])
+#define PAUSE_BUTTON (keystate[KEY_RETURN])
 #define POLL_CONTROLS 
 #endif
 

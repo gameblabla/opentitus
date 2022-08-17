@@ -577,11 +577,11 @@ int viewintrotext(){
 
 int nogame_data(){
     int retval;
-	print_string("MISSING GAME DATA !", 0xFFFF, 0, 24, 16, screen->pixels);
+	print_string("MISSING GAMEDATA !", 0xFFFF, 0, 24, 16, screen->pixels);
 	#if defined(DREAMCAST)
 	print_string("Make sure to put it on your SD card", 0xFFFF, 0, 24, 48, screen->pixels);
-	print_string("OR", 0xFFFF, 0, 24, 64, screen->pixels);
-	print_string("rebuild the ISO with data inside.", 0xFFFF, 0, 24, 80, screen->pixels);
+	print_string("in a folder called titus...", 0xFFFF, 0, 24, 64, screen->pixels);
+	print_string("OR rebuild the ISO with data inside.", 0xFFFF, 0, 24, 80, screen->pixels);
 	
 	print_string("SD card needs to be formatted in", 0xFFFF, 0, 24, 96, screen->pixels);
 	print_string("FAT32 format and be plugged to the", 0xFFFF, 0, 24, 96+16, screen->pixels);

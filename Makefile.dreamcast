@@ -1,6 +1,11 @@
-CC = gcc
-INCLUDE = -I./include -I./opl -I/usr/include/SDL
-CFLAGS  = -O2 -g3 -D_GNU_SOURCE=1 -D_REENTRANT $(INCLUDE) -std=gnu99 -DHOME_SUPPORT
+CC = kos-cc
+INCLUDE = -I./include -I./opl
+
+CFLAGS  = -Ofast -maccumulate-outgoing-args -mpretend-cmove -m4-single-only -fno-schedule-insns2 -ffast-math -fargument-noalias-global -fomit-frame-pointer -ffunction-sections -fdata-sections -flto
+LDFLAGS = -Wl,--as-needed -Wl,--gc-sections -flto
+
+CFLAGS	+= -Wall -DAUDIO_ENABLED -Wuninitialized  -D_GNU_SOURCE=1 -D_REENTRANT $(INCLUDE) -std=gnu99 -DDREAMCAST
+
 UNSQZ_TARG := unsqz
 # LEVELVIEWER_TARG := levelviewer
 OPENTITUS_TARG := opentitus
@@ -53,7 +58,15 @@ $(UNSQZ_TARG) : $(UNSQZ_OBJS)
 # 	$(CC) $(CFLAGS) -o $(LEVELVIEWER_TARG) $(LEVELVIEWER_OBJS) `sdl-config --cflags --libs`
 
 $(OPENTITUS_TARG) : $(OPENTITUS_OBJS)
-	$(CC) $(CFLAGS) -o $(OPENTITUS_TARG) $(OPENTITUS_OBJS) `sdl-config --cflags --libs` -lm -lSDL_mixer
+	$(CC) $(CFLAGS) -o $(OPENTITUS_TARG) $(OPENTITUS_OBJS) -g3 -lSDL -lm -lkosfat $(LDFLAGS)
+
+pack:
+	rm -f IP.BIN
+	sh-elf-objcopy -R .stack -O binary $(OPENTITUS_TARG) main.bin
+	${KOS_BASE}/utils/scramble/scramble main.bin ./cd/1ST_READ.BIN
+	makeip ip.txt IP.BIN
+	mkisofs -V opentitus -G IP.BIN -joliet -rock -l -x cd -o "opentitus.iso" ./cd
+	cdi4dc opentitus.iso opentitus.cdi -d
 
 clean :
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o, $(addsuffix $(suffix),$(dir))))

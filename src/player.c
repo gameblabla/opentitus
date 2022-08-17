@@ -99,8 +99,13 @@ int move_player(TITUS_level *level) {
     //Part 1: Check keyboard input
     SDL_PumpEvents(); //Update keyboard state
     keystate = SDL_GetKeyState(NULL);
-
-#ifndef DREAMCAST
+	POLL_CONTROLS
+#ifdef DREAMCAST
+	if (buttonPressed_DC(CONT_START))
+	{
+		pause = true;
+	}
+#else
     while(SDL_PollEvent(&event)) { //Check all events
         if (event.type == SDL_QUIT) {
             return TITUS_ERROR_QUIT;
@@ -490,9 +495,16 @@ int t_pause (TITUS_level *level) {
     flip_screen(true); //Display it
     copysprite(level, &(player->sprite), &(tmp)); //Reset player sprite
     //SDL_FreeSurface(tmp.buffer);
+
     do {
         titus_sleep();
         keystate = SDL_GetKeyState(NULL);
+        
+        POLL_CONTROLS
+#if defined(DREAMCAST)
+		if (buttonPressed_DC(CONT_START)) return 0;
+#endif
+        
         while(SDL_PollEvent(&event)) { //Check all events
             if (event.type == SDL_QUIT) {
                 return TITUS_ERROR_QUIT;
@@ -528,6 +540,7 @@ int t_pause (TITUS_level *level) {
             }
         }
     } while (1);
+    
     
     return 0;
 }

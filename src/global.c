@@ -15,6 +15,16 @@ cont_state_t *state;
 uint8 partition_type;
 kos_blockdev_t sd_dev;
 int is_sdcard = 0;
+static uint32_t p_buttons = 0;   //previous buttons
+//This simple function will check if a button has been pressed
+int buttonPressed_DC(int key) {
+  if (state->buttons & key && !(p_buttons & key)) { //Compares to the current state and the previous buttons states.
+      p_buttons |= state->buttons; // If true, it will "add" the buttons to the pressed buttons
+      return(1);
+  }
+  p_buttons &= state->buttons;
+  return(0);
+}
 #endif
 
 uint8 RESETLEVEL_FLAG;

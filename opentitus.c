@@ -164,7 +164,7 @@ exitgame:
 }
 
 int init() {
-
+	int flags;
     int retval;
 	char path_folder[256];
 
@@ -181,7 +181,8 @@ int init() {
 	#ifdef _TINSPIRE
 		sprintf(path_folder, "/documents/opentitus/%s.tns", OPENTITUS_CONFIG_FILE);
 	#elif defined(DREAMCAST)
-		/*if(sd_init()) 
+		#ifdef SDCARD_ENABLED
+		if(sd_init()) 
 		{
 			printf("No SD card detected. Make sure to have SD card !\n");
 		}
@@ -191,9 +192,11 @@ int init() {
 			sd_blockdev_for_partition(0, &sd_dev, &partition_type);
 			fs_fat_init();
 			fs_fat_mount("/sd", &sd_dev, FS_FAT_MOUNT_READONLY);
-		}*/
+		}
+		#endif
+		cont_btn_callback(0, CONT_START | CONT_A | CONT_B | CONT_X | CONT_Y, (void (*)(unsigned char, long  unsigned int))arch_exit);
 		SDL_DC_SetVideoDriver(SDL_DC_DMA_VIDEO);
-		
+		SDL_DC_VerticalWait(1);
 		sprintf(path_folder, "/cd/%s", OPENTITUS_CONFIG_FILE);
 	#else
 		sprintf(path_folder, "./%s", OPENTITUS_CONFIG_FILE);
@@ -205,30 +208,28 @@ int init() {
     {
 		// Make sure to init at least something
 		SDL_Init(SDL_INIT_VIDEO);
-		screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 320 + 32, 200, 16, 0, 0, 0, 0);
-		rl_screen = SDL_SetVideoMode(320, 200, 0, SDL_SWSURFACE | SDL_DOUBLEBUF);
+		screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 320 + 32, 192, 16, 0, 0, 0, 0);
+		rl_screen = SDL_SetVideoMode(320, 192, 0, SDL_SWSURFACE | SDL_DOUBLEBUF);
         return retval;
 	}
 	
 #ifdef AUDIO_ENABLED
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         printf("Unable to initialize SDL: %s\n", SDL_GetError());
         return TITUS_ERROR_SDL_ERROR;
     }
 #else
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("Unable to initialize SDL: %s\n", SDL_GetError());
         return TITUS_ERROR_SDL_ERROR;
     }
 #endif
 
+	SDL_ShowCursor(SDL_DISABLE);
+#ifdef DREAMCAST
+	flags = SDL_HWSURFACE | SDL_DOUBLEBUF;
 /*
-#ifdef _DINGUX
-    //fullscreen
-    SDL_ShowCursor(SDL_DISABLE);
-    screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, SDL_SWSURFACE);
 #elif __vita__
-    SDL_ShowCursor(SDL_DISABLE);
     screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, SDL_HWSURFACE|SDL_DOUBLEBUF);
 
     int sh = 544;
@@ -238,29 +239,32 @@ int init() {
 
     SDL_InitSubSystem(SDL_INIT_JOYSTICK);
     joystick = SDL_JoystickOpen(0);
+*/
+#elif defined(DINGUX) || defined(GCW)
+	flags = SDL_HWSURFACE | SDL_TRIPLEBUF;
 #else
     switch (videomode) {
     case 0: //window mode
-        screen = SDL_SetVideoMode(reswidth, resheight, 0, SDL_HWSURFACE | SDL_DOUBLEBUF);
+        SDL_ShowCursor(SDL_ENABLE);
+        flags = SDL_HWSURFACE | SDL_DOUBLEBUF;
         SDL_WM_SetCaption(OPENTITUS_WINDOW_TEXT, 0);
         break;
     case 1: //fullscreen
-        SDL_ShowCursor(SDL_DISABLE);
-        screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, SDL_DOUBLEBUF | SDL_FULLSCREEN);
+        flags = SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_FULLSCREEN;
         break;
     }
+	
 #endif
-*/
 
-	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, reswidth + 32, resheight, bitdepth, 0, 0, 0, 0);
-	rl_screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, SDL_HWSURFACE | SDL_DOUBLEBUF);
+	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, reswidth + 32, 200, bitdepth, 0, 0, 0, 0);
+	rl_screen = SDL_SetVideoMode(reswidth, resheight, bitdepth, flags);
 	 
-    if (screen == NULL) {
+    if (rl_screen == NULL) {
         printf("Unable to set video mode: %s\n", SDL_GetError());
         return TITUS_ERROR_SDL_ERROR;
     }
 
-    SDL_EnableUNICODE (1);
+    //SDL_EnableUNICODE (1);
 
 /*
 #ifdef AUDIO_MIKMOD_SINGLETHREAD

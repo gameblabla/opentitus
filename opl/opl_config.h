@@ -7,8 +7,8 @@
 #define SOUND_SAMPLES 512
 #else
 #define STEREO_SOUND 1
-#define SOUND_FREQUENCY 8000
-#define SOUND_SAMPLES 512
+#define SOUND_FREQUENCY 44100
+#define SOUND_SAMPLES 1024
 #endif
 
 #ifdef STEREO_SOUND
