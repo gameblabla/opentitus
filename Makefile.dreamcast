@@ -4,7 +4,7 @@ INCLUDE = -I./include -I./opl
 CFLAGS  = -Ofast -maccumulate-outgoing-args -mpretend-cmove -m4-single-only -fno-schedule-insns2 -ffast-math -fargument-noalias-global -fomit-frame-pointer -ffunction-sections -fdata-sections -flto
 LDFLAGS = -Wl,--as-needed -Wl,--gc-sections -flto
 
-CFLAGS	+= -Wall -DAUDIO_ENABLED -Wuninitialized  -D_GNU_SOURCE=1 -D_REENTRANT $(INCLUDE) -std=gnu99 -DDREAMCAST
+CFLAGS	+= -Wall -DAUDIO_ENABLED -Wuninitialized  -D_GNU_SOURCE=1 -D_REENTRANT $(INCLUDE) -std=gnu99 -DDREAMCAST -DSDCARD_ENABLED
 
 UNSQZ_TARG := unsqz
 # LEVELVIEWER_TARG := levelviewer
