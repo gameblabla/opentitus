@@ -1,9 +1,12 @@
-CC = gcc
-INCLUDE = -I./include -I./opl -I/usr/include/SDL
-CFLAGS  = -O2 -g3 -D_GNU_SOURCE=1 -D_REENTRANT $(INCLUDE) -std=gnu99
+CC = /opt/gcw0-toolchain/bin/mipsel-linux-gcc
+INCLUDE = -I./include -I./opl
+CFLAGS  = -O2 -flto -s $(INCLUDE) -DGCW -DHOME_SUPPORT -D_GNU_SOURCE=1 -D_REENTRANT -DDINGUX
 UNSQZ_TARG := unsqz
+
+LDFLAGS = -lSDL -lm
+
 # LEVELVIEWER_TARG := levelviewer
-OPENTITUS_TARG := opentitus
+OPENTITUS_TARG := opentitus.elf
 UNSQZ_OBJS := \
 	unsqz.o \
 	src/sqz.o
@@ -53,7 +56,7 @@ $(UNSQZ_TARG) : $(UNSQZ_OBJS)
 # 	$(CC) $(CFLAGS) -o $(LEVELVIEWER_TARG) $(LEVELVIEWER_OBJS) `sdl-config --cflags --libs`
 
 $(OPENTITUS_TARG) : $(OPENTITUS_OBJS)
-	$(CC) $(CFLAGS) -o $(OPENTITUS_TARG) $(OPENTITUS_OBJS) `sdl-config --cflags --libs` -lm -lSDL_mixer
+	$(CC) $(CFLAGS) -o $(OPENTITUS_TARG) $(OPENTITUS_OBJS) $(LDFLAGS)
 
 clean :
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o, $(addsuffix $(suffix),$(dir))))

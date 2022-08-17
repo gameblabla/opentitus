@@ -270,7 +270,7 @@ int viewmenu(char * menufile, int menuformat) {
 #ifdef __vita__
                 if (event.jbutton.button == KEY_RETURN || event.jbutton.button == KEY_ENTER || event.jbutton.button == KEY_SPACE)
 #else
-                if (event.key.keysym.sym == KEY_RETURN || event.key.keysym.sym == KEY_ENTER || event.key.keysym.sym == KEY_SPACE)
+                if (event.key.keysym.sym == KEY_RETURN || event.key.keysym.sym == KEY_ENTER || event.key.keysym.sym == KEY_SPACE || event.key.keysym.sym == KEY_JUMP)
 #endif
                     menuloop = 0;
 #ifdef AUDIO_ENABLED

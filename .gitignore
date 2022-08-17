@@ -3,3 +3,8 @@ opentitus
 *.o
 moktar/*.SQZ
 titus/*.SQZ
+*.elf
+./opentitus
+*.cdi
+*.iso
+*.zip

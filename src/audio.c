@@ -372,7 +372,17 @@ int load_file(char *filename, unsigned char **raw_data)
     char path_work[256];
     
 #ifdef HOME_SUPPORT
-    sprintf(path_work, "%s/.opentitus/%s", getenv("HOME"), filename);
+	/* Try locally first on DINGUX */
+	#ifdef DINGUX
+	sprintf(path_work, "./%s", filename);
+	ifp = fopen(path_work, "rb");
+	if (ifp == NULL) {
+		sprintf(path_work, "%s/.opentitus/%s", getenv("HOME"), filename);
+	}
+	else { fclose(ifp); }
+	#else
+		sprintf(path_work, "%s/.opentitus/%s", getenv("HOME"), filename);
+	#endif
 #else
 	#if defined(_TINSPIRE)
 		sprintf(path_work, "./%s.tns", filename);

@@ -77,7 +77,7 @@ extern int buttonPressed_DC(int key);
 #endif
 
 //To simplify porting:
-#ifdef _DINGUX
+#ifdef DINGUX
 
 /*
 #define DINGOO_BUTTON_UP            SDLK_UP
@@ -97,12 +97,16 @@ extern int buttonPressed_DC(int key);
 
 #define KEY_F1          DINGOO_BUTTON_R //Loose a life
 #define KEY_F2          SDLK_F2 //Game over, not in use
-#define KEY_STATUS      DINGOO_BUTTON_A //Energy + status page
+
+
+//#define KEY_STATUS      DINGOO_BUTTON_A //Energy + status page
+#define KEY_STATUS 		SDLK_F12
+
 #define KEY_LEFT        DINGOO_BUTTON_LEFT //Left
 #define KEY_RIGHT       DINGOO_BUTTON_RIGHT //Right
 #define KEY_UP          DINGOO_BUTTON_UP //Up
 #define KEY_DOWN        DINGOO_BUTTON_DOWN //Down
-#define KEY_JUMP        DINGOO_BUTTON_X //Jump
+#define KEY_JUMP        DINGOO_BUTTON_A //Jump
 #define KEY_SPACE       DINGOO_BUTTON_B //Space
 #define KEY_ENTER       DINGOO_BUTTON_START //Enter
 #define KEY_RETURN      DINGOO_BUTTON_START //Return
@@ -112,6 +116,12 @@ extern int buttonPressed_DC(int key);
 #define KEY_SKIPLEVEL   DINGOO_BUTTON_R //Skip level
 #define KEY_DEBUG       DINGOO_BUTTON_Y //Toggle debug mode
 #define KEY_MUSIC       DINGOO_BUTTON_Y //Toggle music
+
+#define KEY_GODMODE SDLK_F1 //Toggle godmode
+#define KEY_E SDLK_F3 //Display energy
+#define KEY_F4 SDLK_F4 //Status page
+#define KEY_NOCLIP SDLK_n //Toggle noclip
+
 
 #elif __vita__
 

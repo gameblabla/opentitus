@@ -251,7 +251,7 @@ int init() {
     SDL_InitSubSystem(SDL_INIT_JOYSTICK);
     joystick = SDL_JoystickOpen(0);
 */
-#elif defined(DINGUX) || defined(GCW)
+#elif defined(DINGUX)
 	flags = SDL_HWSURFACE | SDL_TRIPLEBUF;
 #else
     switch (videomode) {
